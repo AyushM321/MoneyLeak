@@ -85,6 +85,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 .upload-actions{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
 .upload-actions .btn{min-width:112px}
 .import-dialog .notice{font-size:11px}
+.history-panel{padding:18px;margin-bottom:20px}
+.history-help{font-size:12px;margin:4px 0 0}
+.history-list{display:grid;gap:9px;margin-top:14px}
+.history-empty{color:var(--muted);font-size:13px;margin:8px 0}
+.history-item{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--panel2);color:var(--text)}
+.history-item:active{border-color:var(--green)}
+.history-item-main{min-width:0;display:grid;gap:4px}
+.history-item-title{font-size:13px;font-weight:750;overflow-wrap:anywhere}
+.history-item-meta{font-size:11px;color:var(--muted)}
+.history-item-count{font-size:12px;color:var(--green);white-space:nowrap}
+#historyCount{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#153a30;font-size:10px}
 @media(max-width:600px){
  .intro{margin-bottom:18px;padding-top:2px}
  .intro h1{font-size:clamp(29px,8vw,36px);line-height:1.12;letter-spacing:-1.2px}
@@ -110,9 +121,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.8</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.9</small>
   </div>
-  <button class="privacy" id="openImport" type="button">＋ Import statement</button>
+  <button class="privacy" id="openHistory" type="button">History <span id="historyCount">0</span></button>
 </header>
 
 <main>
@@ -121,6 +132,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
   <h1>Your money, <span style="color:var(--green)">made clearer.</span></h1>
   <p class="muted">Spot spending patterns, find potential money leaks, and make smarter choices — all from your statement, right on your device.</p>
   <button class="btn" id="heroImport" type="button">Import a statement <span aria-hidden="true">→</span></button>
+</section>
+
+<section class="panel history-panel" id="historySection">
+  <div class="section-head"><div><h2>Statement history</h2><p class="muted history-help">Your recent imports, saved only on this device.</p></div><button class="btn ghost" id="clearHistory" type="button">Clear history</button></div>
+  <div id="historyList" class="history-list"><p class="muted">No saved statements yet. Import a CSV or PDF to start your history.</p></div>
 </section>
 
 <div class="import-overlay hidden" id="importOverlay"><div class="import-backdrop" id="importBackdrop"></div><div class="import-modal-scroll"><section class="panel import-dialog" role="dialog" aria-modal="true" aria-labelledby="importTitle">
@@ -388,6 +404,94 @@ async function parsePDF(file) {
  return result;
 }
 
+const HISTORY_KEY = "moneyleak_statement_history_v1";
+let historyItems = [];
+let activeHistoryId = null;
+
+function readHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    historyItems = Array.isArray(saved) ? saved.filter(item => item && Array.isArray(item.transactions)) : [];
+  } catch (error) {
+    historyItems = [];
+  }
+}
+function writeHistory() {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(historyItems.slice(0,20)));
+    return true;
+  } catch (error) {
+    $("status").textContent = "This device could not save the history (storage may be full). Your current report is still available until you leave this page.";
+    return false;
+  }
+}
+function renderHistory() {
+  const list = $("historyList");
+  list.replaceChildren();
+  $("historyCount").textContent = String(historyItems.length);
+  if (!historyItems.length) {
+    const empty = document.createElement("p");
+    empty.className = "history-empty";
+    empty.textContent = "No saved statements yet. Import a CSV or PDF to start your history.";
+    list.append(empty);
+    return;
+  }
+  historyItems.forEach(item => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "history-item";
+    const main = document.createElement("span");
+    main.className = "history-item-main";
+    const title = document.createElement("span");
+    title.className = "history-item-title";
+    title.textContent = item.name || "Imported statement";
+    const meta = document.createElement("span");
+    meta.className = "history-item-meta";
+    meta.textContent = new Date(item.savedAt).toLocaleString() + " · " + item.transactions.length + " transactions";
+    main.append(title, meta);
+    const count = document.createElement("span");
+    count.className = "history-item-count";
+    count.textContent = "Open →";
+    button.append(main, count);
+    button.addEventListener("click", () => {
+      activeHistoryId = item.id;
+      analyze(item.transactions);
+      $("status").textContent = "Restored " + item.transactions.length + " transactions from this device's saved history.";
+      $("report").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    list.append(button);
+  });
+}
+function saveImportedHistory(name, data) {
+  const item = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    name: name || "Imported statement",
+    savedAt: new Date().toISOString(),
+    transactions: data.map(t => ({date:t.date, description:t.description, amount:Number(t.amount), type:t.type, category:t.category}))
+  };
+  historyItems.unshift(item);
+  historyItems = historyItems.slice(0,20);
+  activeHistoryId = item.id;
+  writeHistory();
+  renderHistory();
+}
+function updateActiveHistory() {
+  if (!activeHistoryId) return;
+  const item = historyItems.find(entry => entry.id === activeHistoryId);
+  if (!item) return;
+  item.transactions = transactions.map(t => ({date:t.date, description:t.description, amount:Number(t.amount), type:t.type, category:t.category}));
+  writeHistory();
+}
+function restoreLastHistory() {
+  readHistory();
+  renderHistory();
+  if (historyItems.length) {
+    activeHistoryId = historyItems[0].id;
+    analyze(historyItems[0].transactions);
+    $("status").textContent = "Restored your latest statement from this device.";
+  }
+}
+
 function analyze(data) {
  transactions = data;
  $("report").classList.remove("hidden");
@@ -452,7 +556,7 @@ function analyze(data) {
    if(c===t.category)option.selected=true;
    select.append(option);
   });
-  select.addEventListener("change",()=>{t.category=select.value;analyze(transactions);});
+  select.addEventListener("change",()=>{t.category=select.value;analyze(transactions);updateActiveHistory();});
   td.append(select);tr.append(td);tbody.append(tr);
  });
 }
@@ -485,7 +589,9 @@ $("provide").addEventListener("click", async () => {
     const data = pdf ? await parsePDF(file) : parseCSV(await file.text());
     if (!data.length) throw Error("No transactions found.");
     analyze(data);
-    $("status").textContent = "Read " + data.length + " transactions locally. Please verify the dates, amounts, income/expense types and categories before relying on the report.";
+    saveImportedHistory(file.name, data);
+    $("status").textContent = "Read " + data.length + " transactions. Saved to this device's history. Please verify the results.";
+    closeImportDialog();
   } catch (error) {
     console.error("MoneyLeak upload error:", error);
     $("status").textContent = "Upload failed: " + (error.message || "Unknown error. Try a CSV export.");
@@ -504,7 +610,7 @@ function closeImportDialog() {
   $("importOverlay").classList.add("hidden");
   document.body.style.overflow = "";
 }
-$("openImport").addEventListener("click", openImportDialog);
+$("openHistory").addEventListener("click", () => $("historySection").scrollIntoView({behavior:"smooth", block:"start"}));
 $("heroImport").addEventListener("click", openImportDialog);
 $("closeImport").addEventListener("click", closeImportDialog);
 $("importBackdrop").addEventListener("click", closeImportDialog);
@@ -513,6 +619,7 @@ document.addEventListener("keydown", event => {
 });
 
 $("demo").addEventListener("click",()=>{
+ activeHistoryId = null;
  analyze([
   {date:"2026-10-01",description:"Monthly salary",amount:30000,type:"income",category:"Salary"},
   {date:"2026-10-02",description:"House rent",amount:7000,type:"expense",category:"Rent"},
@@ -524,8 +631,18 @@ $("demo").addEventListener("click",()=>{
   {date:"2026-10-10",description:"Bank fee",amount:250,type:"expense",category:"Bank fees"}
  ]);
  $("status").textContent="Demo data loaded. All transactions are fictional.";
+ closeImportDialog();
 });
 
+$("clearHistory").addEventListener("click", () => {
+  if (!historyItems.length) return;
+  if (!confirm("Delete all saved statement history from this device?")) return;
+  historyItems = [];
+  activeHistoryId = null;
+  try { localStorage.removeItem(HISTORY_KEY); } catch (error) {}
+  renderHistory();
+  $("status").textContent = "Saved statement history cleared from this device.";
+});
 $("reset").addEventListener("click",()=>{
  transactions=[];
  $("report").classList.add("hidden");
@@ -542,6 +659,7 @@ $("export").addEventListener("click",()=>{
  const a=document.createElement("a");a.href=url;a.download="moneyleak-report.csv";a.click();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
+restoreLastHistory();
 })();
 </script>
 </body>
