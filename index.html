@@ -3,12 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07110D">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MoneyLeak">
 <title>MoneyLeak | Personal Finance Insights</title>
 <style>
@@ -23,7 +22,7 @@ header{background:#0e1520;border-bottom:1px solid var(--border);padding:15px max
 .brand span{color:var(--green)}
 .version-badge{font-size:11px;letter-spacing:0;font-weight:800;color:var(--green);background:#153a30;border:1px solid #285644;border-radius:6px;padding:4px 6px;margin-left:2px;white-space:nowrap}
 .logo{width:42px;height:42px;flex-shrink:0}
-.privacy{color:var(--green);font-size:12px;border:1px solid #275b49;border-radius:30px;padding:7px 10px}
+.privacy{color:var(--green);font-size:12px;border:1px solid #275b49;border-radius:30px;padding:7px 10px;background:transparent;white-space:nowrap}
 main{max-width:1100px;margin:32px auto;padding:0 18px 45px}
 .eyebrow{color:var(--green);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}
 h1{font-size:clamp(30px,5vw,46px);letter-spacing:-1.7px;line-height:1.15;margin:12px 0}
@@ -77,9 +76,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.7</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.8</small>
   </div>
-  <div class="privacy">● Private by design</div>
+  <button class="privacy" id="demo" type="button">Try demo data</button>
 </header>
 
 <main>
@@ -99,9 +98,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
     <div><strong>Select your bank statement</strong></div>
     <p class="muted" style="font-size:13px">CSV or text-based PDF · Maximum 10 MB</p>
     <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Select bank statement">
-    <button class="btn secondary" id="demo" type="button">Try demo data</button>
+    <button class="btn secondary" id="provide" type="button">Provide</button>
   </div>
-  <p id="status" class="muted status" role="status" aria-live="polite">Ready. Choose a statement or try demo data.</p>
+  <p id="status" class="muted status" role="status" aria-live="polite">Choose a CSV or PDF statement, then tap Provide to process it.</p>
   <div class="notice">Privacy: your statement is not sent to a MoneyLeak server. PDF.js is loaded from a public CDN. Never upload banking passwords, PINs, or OTPs. Scanned PDFs may require OCR and are not supported by this reader. Always verify the results.</div>
 </section>
 
@@ -131,7 +130,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
   </div>
 </section>
 </div>
-<footer>MoneyLeak · Personal finance insights · Verify estimates before making financial decisions</footer>
+<footer>MoneyLeak · Personal finance insights · Verify estimates before making financial decisions<br><strong>Made by AyushXO</strong></footer>
 </main>
 
 <script>
@@ -401,26 +400,42 @@ function analyze(data) {
  });
 }
 
-$("file").addEventListener("change",async event=>{
- const file=event.target.files && event.target.files[0];
- if(!file)return;
- $("file").disabled=true;
- try{
-  if(file.size>10*1024*1024)throw Error("File too large. Choose a file under 10 MB.");
-  const pdf=/\.pdf$/i.test(file.name), csv=/\.csv$/i.test(file.name);
-  if(!pdf&&!csv)throw Error("Please select a PDF or CSV file.");
+let selectedStatement = null;
+$("file").addEventListener("change", event => {
+  selectedStatement = event.target.files && event.target.files[0] || null;
+  if (selectedStatement) {
+    $("status").textContent = "Selected: " + selectedStatement.name + ". Tap Provide to start processing.";
+  } else {
+    $("status").textContent = "No statement selected.";
+  }
+});
 
-  $("status").textContent=pdf?"Loading PDF reader…":"Reading CSV statement…";
-  const data=pdf?await parsePDF(file):parseCSV(await file.text());
-  if(!data.length)throw Error("No transactions found.");
-  analyze(data);
-  $("status").textContent="Read "+data.length+" transactions locally. Please verify the dates, amounts, income/expense types and categories before relying on the report.";
- }catch(error){
-  console.error("MoneyLeak upload error:",error);
-  $("status").textContent="Upload failed: "+(error.message||"Unknown error. Try a CSV export.");
- }finally{
-  $("file").disabled=false;
- }
+$("provide").addEventListener("click", async () => {
+  const file = selectedStatement;
+  if (!file) {
+    $("status").textContent = "Please choose a CSV or PDF statement first.";
+    $("file").focus();
+    return;
+  }
+  $("provide").disabled = true;
+  $("file").disabled = true;
+  try {
+    if (file.size > 10 * 1024 * 1024) throw Error("File too large. Choose a file under 10 MB.");
+    const pdf = /\.pdf$/i.test(file.name), csv = /\.csv$/i.test(file.name);
+    if (!pdf && !csv) throw Error("Please select a PDF or CSV file.");
+
+    $("status").textContent = pdf ? "Loading PDF reader…" : "Reading CSV statement…";
+    const data = pdf ? await parsePDF(file) : parseCSV(await file.text());
+    if (!data.length) throw Error("No transactions found.");
+    analyze(data);
+    $("status").textContent = "Read " + data.length + " transactions locally. Please verify the dates, amounts, income/expense types and categories before relying on the report.";
+  } catch (error) {
+    console.error("MoneyLeak upload error:", error);
+    $("status").textContent = "Upload failed: " + (error.message || "Unknown error. Try a CSV export.");
+  } finally {
+    $("provide").disabled = false;
+    $("file").disabled = false;
+  }
 });
 
 $("demo").addEventListener("click",()=>{
