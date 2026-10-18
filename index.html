@@ -96,6 +96,26 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 .history-item-meta{font-size:11px;color:var(--muted)}
 .history-item-count{font-size:12px;color:var(--green);white-space:nowrap}
 #historyCount{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:#153a30;font-size:10px}
+
+.top-nav{display:flex;align-items:center;gap:8px}
+.nav-btn{padding:9px 12px}
+.app-view{min-width:0}
+.page-heading{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.page-heading h1{margin:8px 0;font-size:clamp(28px,4vw,38px)}
+.page-heading p{margin:0;font-size:14px}
+.page-heading .back-home{flex-shrink:0}
+.info-panel{margin-bottom:16px;line-height:1.7}
+.info-panel p,.info-panel li{font-size:14px;line-height:1.75}
+.info-panel ul,.info-panel ol{padding-left:22px}
+.info-panel li{margin:6px 0}
+.info-subtitle{font-size:12px;margin:4px 0 0}
+.release-item{padding:16px 0;border-top:1px solid var(--border)}
+.release-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.release-title strong{font-size:15px}
+.release-title .muted{font-size:12px}
+.release-item ul{margin:8px 0 0;padding-left:20px}
+.release-item li{margin:5px 0;color:var(--muted);font-size:13px;line-height:1.65}
+
 @media(max-width:600px){
  .intro{margin-bottom:18px;padding-top:2px}
  .intro h1{font-size:clamp(29px,8vw,36px);line-height:1.12;letter-spacing:-1.2px}
@@ -108,7 +128,21 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
  input[type=file]{font-size:12px}
 }
 
-@media(max-width:600px){header{padding:13px 15px}.brand{font-size:21px}.logo{width:36px;height:36px}.privacy{font-size:10px}main{margin-top:24px;padding:0 13px 35px}.panel{padding:16px}.stats{grid-template-columns:1fr}.stat{padding:15px}.categories{grid-template-columns:1fr}}
+@media(max-width:600px){
+ header{padding:12px 12px;align-items:center}
+ .brand{font-size:18px;gap:7px;letter-spacing:-.7px}
+ .logo{width:32px;height:32px}
+ .top-nav{gap:5px}
+ .privacy.nav-btn{font-size:10px;padding:7px 8px}
+ main{margin-top:24px;padding:0 13px 35px}
+ .panel{padding:16px}
+ .stats{grid-template-columns:1fr}
+ .stat{padding:15px}
+ .categories{grid-template-columns:1fr}
+ .page-heading{display:block}
+ .page-heading .back-home{margin-bottom:18px}
+ .release-title{align-items:flex-start}
+}
 </style>
 </head>
 <body>
@@ -121,12 +155,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.9</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v4.0</small>
   </div>
-  <button class="privacy" id="openHistory" type="button">History <span id="historyCount">0</span></button>
+  <nav class="top-nav" aria-label="Main navigation">
+    <button class="privacy nav-btn" id="openHome" type="button">Home</button>
+    <button class="privacy nav-btn" id="openHistory" type="button">History <span id="historyCount">0</span></button>
+    <button class="privacy nav-btn" id="openMore" type="button">More ⋯</button>
+  </nav>
 </header>
 
 <main>
+<div id="homeView" class="app-view">
 <section class="intro">
   <div class="eyebrow"><span class="eyebrow-dot"></span> Private personal finance</div>
   <h1>Your money, <span style="color:var(--green)">made clearer.</span></h1>
@@ -134,26 +173,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
   <button class="btn" id="heroImport" type="button">Import a statement <span aria-hidden="true">→</span></button>
 </section>
 
-<section class="panel history-panel" id="historySection">
-  <div class="section-head"><div><h2>Statement history</h2><p class="muted history-help">Your recent imports, saved only on this device.</p></div><button class="btn ghost" id="clearHistory" type="button">Clear history</button></div>
-  <div id="historyList" class="history-list"><p class="muted">No saved statements yet. Import a CSV or PDF to start your history.</p></div>
-</section>
 
-<div class="import-overlay hidden" id="importOverlay"><div class="import-backdrop" id="importBackdrop"></div><div class="import-modal-scroll"><section class="panel import-dialog" role="dialog" aria-modal="true" aria-labelledby="importTitle">
-  <div class="import-heading"><div><h2 id="importTitle">Import your statement</h2><p class="muted import-subtitle">Your file stays on this device.</p></div><button class="close-import" id="closeImport" type="button" aria-label="Close import window">×</button></div>
-  <p class="muted">Choose a CSV or text-based PDF statement. Processing happens in your browser.</p>
-  <div class="upload">
-    <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path d="M24 31V7m0 0-9 9m9-9 9 9M9 29v10a3 3 0 0 0 3 3h24a3 3 0 0 0 3-3V29" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <div><strong>Select your bank statement</strong></div>
-    <p class="muted" style="font-size:13px">CSV or text-based PDF · Maximum 10 MB</p>
-    <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Select bank statement">
-    <div class="upload-actions"><button class="btn secondary" id="provide" type="button">Provide</button><button class="btn ghost" id="demo" type="button">Try demo data</button></div>
-  </div>
-  <p id="status" class="muted status" role="status" aria-live="polite">Choose a CSV or PDF statement, then tap Provide to process it.</p>
-  <div class="notice">Privacy: your statement is not sent to a MoneyLeak server. PDF.js is loaded from a public CDN. Never upload banking passwords, PINs, or OTPs. Scanned PDFs may require OCR and are not supported by this reader. Always verify the results.</div>
-</section></div></div>
 
 <div id="report" class="hidden">
 <section class="stats">
@@ -181,6 +201,58 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
   </div>
 </section>
 </div>
+</div><!-- /homeView -->
+
+<div class="import-overlay hidden" id="importOverlay"><div class="import-backdrop" id="importBackdrop"></div><div class="import-modal-scroll"><section class="panel import-dialog" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+  <div class="import-heading"><div><h2 id="importTitle">Import your statement</h2><p class="muted import-subtitle">Your file stays on this device.</p></div><button class="close-import" id="closeImport" type="button" aria-label="Close import window">×</button></div>
+  <p class="muted">Choose a CSV or text-based PDF statement. Processing happens in your browser.</p>
+  <div class="upload">
+    <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d="M24 31V7m0 0-9 9m9-9 9 9M9 29v10a3 3 0 0 0 3 3h24a3 3 0 0 0 3-3V29" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div><strong>Select your bank statement</strong></div>
+    <p class="muted" style="font-size:13px">CSV or text-based PDF · Maximum 10 MB</p>
+    <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Select bank statement">
+    <div class="upload-actions"><button class="btn secondary" id="provide" type="button">Provide</button><button class="btn ghost" id="demo" type="button">Try demo data</button></div>
+  </div>
+  <p id="status" class="muted status" role="status" aria-live="polite">Choose a CSV or PDF statement, then tap Provide to process it.</p>
+  <div class="notice">Privacy: your statement is not sent to a MoneyLeak server. PDF.js is loaded from a public CDN. Never upload banking passwords, PINs, or OTPs. Scanned PDFs may require OCR and are not supported by this reader. Always verify the results.</div>
+</section></div></div>
+<section id="historyView" class="app-view hidden">
+  <div class="page-heading"><button class="btn ghost back-home" data-view="home" type="button">← Home</button><div><div class="eyebrow">Your saved activity</div><h1>Statement history</h1><p class="muted">Only statements saved in this browser on this device appear here.</p></div></div>
+  <section class="panel history-panel" id="historySection">
+  <div class="section-head"><div><h2>Statement history</h2><p class="muted history-help">Your recent imports, saved only on this device.</p></div><button class="btn ghost" id="clearHistory" type="button">Clear history</button></div>
+  <div id="historyList" class="history-list"><p class="muted">No saved statements yet. Import a CSV or PDF to start your history.</p></div>
+</section>
+</section>
+<section id="moreView" class="app-view hidden">
+  <div class="page-heading"><button class="btn ghost back-home" data-view="home" type="button">← Home</button><div><div class="eyebrow">MoneyLeak information</div><h1>More</h1><p class="muted">App information, policies, and release notes.</p></div></div>
+  <section class="panel info-panel" id="updatesSection">
+    <div class="section-head"><div><h2>What's new</h2><p class="muted info-subtitle">A short changelog for each app update.</p></div><span class="version-badge">Latest · v4.0</span></div>
+    <article class="release-item"><div class="release-title"><strong>Version 4.0</strong><span class="muted">Latest update</span></div><ul><li>Moved Statement history into its own History page.</li><li>Added a More page for policies and version notes.</li><li>Kept the existing local statement history and report features.</li></ul></article>
+    <article class="release-item"><div class="release-title"><strong>Version 3.9</strong></div><ul><li>Saved imported transaction data locally on this device.</li><li>Added statement history and restore-after-refresh behavior.</li><li>Automatically closed the import window after successful processing.</li></ul></article>
+    <article class="release-item"><div class="release-title"><strong>Version 3.8</strong></div><ul><li>Made the import interface a compact, phone-friendly modal.</li><li>Refreshed the headline and added clear import actions.</li></ul></article>
+    <article class="release-item"><div class="release-title"><strong>Version 3.7</strong></div><ul><li>Expanded PDF date recognition for the PhonePe statement format.</li></ul></article>
+  </section>
+  <section class="panel info-panel" id="privacyPolicy">
+    <h2>Privacy policy</h2>
+    <p>MoneyLeak processes statement files in your browser. It does not intentionally upload your statement transactions to a MoneyLeak server. Parsed transaction data used by Statement history is stored in this browser's local storage on this device.</p>
+    <ul><li>Your saved history is limited to this browser profile and device.</li><li>Clearing browser site data may delete saved history.</li><li>Use Clear history to remove saved statement records from this device.</li><li>PDF.js may be loaded from a public CDN, which requires an internet connection.</li><li>Never upload banking passwords, PINs, OTPs, or other authentication secrets.</li></ul>
+    <p class="muted">MoneyLeak is a personal finance insights tool. Check all imported dates, amounts, categories, and calculations yourself before relying on them.</p>
+  </section>
+  <section class="panel info-panel" id="terms">
+    <h2>Terms and conditions</h2>
+    <ol><li><strong>Personal use:</strong> MoneyLeak helps you review transactions and spending patterns for informational purposes.</li><li><strong>Verify your data:</strong> Import parsing and categories can be incomplete or inaccurate; review reports before making decisions.</li><li><strong>No financial advice:</strong> Insights are estimates, not professional financial, tax, legal, or investment advice.</li><li><strong>Your files:</strong> You are responsible for selecting files you have permission to use and for protecting your device and browser data.</li><li><strong>Availability:</strong> The app is provided as-is. Features may change, and local data may be lost if browser data is cleared or the browser/device changes.</li></ol>
+    <p class="muted">By using MoneyLeak, you acknowledge these limitations.</p>
+  </section>
+  <section class="panel info-panel" id="aboutApp">
+    <h2>About MoneyLeak</h2>
+    <p>MoneyLeak helps you review income, expenses, cash flow, spending categories, and potential money leaks from a statement you choose.</p>
+    <p><strong>Made by AyushXO</strong></p>
+  </section>
+</section>
+
+
 <footer>MoneyLeak · Personal finance insights · Verify estimates before making financial decisions<br><strong>Made by AyushXO</strong></footer>
 </main>
 
@@ -457,7 +529,8 @@ function renderHistory() {
       activeHistoryId = item.id;
       analyze(item.transactions);
       $("status").textContent = "Restored " + item.transactions.length + " transactions from this device's saved history.";
-      $("report").scrollIntoView({behavior:"smooth", block:"start"});
+      showView("home");
+      setTimeout(() => $("report").scrollIntoView({behavior:"smooth", block:"start"}), 180);
     });
     list.append(button);
   });
@@ -592,6 +665,8 @@ $("provide").addEventListener("click", async () => {
     saveImportedHistory(file.name, data);
     $("status").textContent = "Read " + data.length + " transactions. Saved to this device's history. Please verify the results.";
     closeImportDialog();
+    showView("home");
+    setTimeout(() => $("report").scrollIntoView({behavior:"smooth", block:"start"}), 180);
   } catch (error) {
     console.error("MoneyLeak upload error:", error);
     $("status").textContent = "Upload failed: " + (error.message || "Unknown error. Try a CSV export.");
@@ -610,7 +685,16 @@ function closeImportDialog() {
   $("importOverlay").classList.add("hidden");
   document.body.style.overflow = "";
 }
-$("openHistory").addEventListener("click", () => $("historySection").scrollIntoView({behavior:"smooth", block:"start"}));
+function showView(name) {
+  $("homeView").classList.toggle("hidden", name !== "home");
+  $("historyView").classList.toggle("hidden", name !== "history");
+  $("moreView").classList.toggle("hidden", name !== "more");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+$("openHome").addEventListener("click", () => showView("home"));
+$("openHistory").addEventListener("click", () => showView("history"));
+$("openMore").addEventListener("click", () => showView("more"));
+document.querySelectorAll("[data-view='home']").forEach(button => button.addEventListener("click", () => showView("home")));
 $("heroImport").addEventListener("click", openImportDialog);
 $("closeImport").addEventListener("click", closeImportDialog);
 $("importBackdrop").addEventListener("click", closeImportDialog);
