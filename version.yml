@@ -1,33 +1,39 @@
 name: Update MoneyLeak version
+
 on:
   push:
     branches: [main]
     paths-ignore:
       - 'version.json'
-      - 'README-INSTALL.txt'
   workflow_dispatch:
+
 permissions:
   contents: write
+
 jobs:
   version:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Write version number
+      - uses: actions/checkout@v4
+      - name: Increment app version
         shell: bash
         run: |
-          RUN_NO="${GITHUB_RUN_NUMBER}"
-          PATCH=$((RUN_NO + 2))
-          printf '{\n  "version": "0.%s"\n}\n' "$PATCH" > version.json
-      - name: Commit version file
-        run: |
-          if git diff --quiet -- version.json; then
-            echo "Version unchanged"
-            exit 0
+          CURRENT=$(jq -r '.version' version.json)
+          CURRENT=${CURRENT#v}
+          if [[ "$CURRENT" =~ ^([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+          else
+            echo "Unexpected version format in version.json: $CURRENT" >&2
+            exit 1
           fi
+          NEXT_MINOR=$((MINOR + 1))
+          printf '{\n  "version": "%s.%s"\n}\n' "$MAJOR" "$NEXT_MINOR" > version.json
+      - name: Commit version change
+        run: |
+          if git diff --quiet -- version.json; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add version.json
-          git commit -m "chore: update app version"
+          git commit -m "chore: auto-increment MoneyLeak version"
           git push

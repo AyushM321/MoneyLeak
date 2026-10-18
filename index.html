@@ -4,7 +4,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1018">
+<meta name="theme-color" content="#07110D">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MoneyLeak">
 <title>MoneyLeak | Personal Finance Insights</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1018;--panel:#121b27;--panel2:#0e1723;--border:#29384b;--text:#f1f5f9;--muted:#9aaabd;--green:#45e0a0;--green2:#153a30;--amber:#ffd18a;--red:#ff919d;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -16,6 +20,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 header{background:#0e1520;border-bottom:1px solid var(--border);padding:15px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:850;letter-spacing:-1px}
 .brand span{color:var(--green)}
+.version-badge{font-size:11px;letter-spacing:0;font-weight:800;color:var(--green);background:#153a30;border:1px solid #285644;border-radius:6px;padding:4px 6px;margin-left:2px;white-space:nowrap}
 .logo{width:42px;height:42px;flex-shrink:0}
 .privacy{color:var(--green);font-size:12px;border:1px solid #275b49;border-radius:30px;padding:7px 10px}
 main{max-width:1100px;margin:32px auto;padding:0 18px 45px}
@@ -71,7 +76,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.3</small>
   </div>
   <div class="privacy">● Private by design</div>
 </header>
@@ -131,10 +136,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 <script>
 "use strict";
 (() => {
+if ("serviceWorker" in navigator) {
+ navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 const $ = id => document.getElementById(id);
 const money = n => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(n);
 let transactions = [];
 let pdfPromise = null;
+fetch("version.json", {cache:"no-store"})
+ .then(response => { if (!response.ok) throw new Error("Version unavailable"); return response.json(); })
+ .then(data => { const badge = document.getElementById("appVersion"); if (badge && data.version) badge.textContent = "v" + data.version; })
+ .catch(() => {});
+
 const categoryNames = [
  "Food & groceries","Transport","Utilities & bills","Subscriptions",
  "Healthcare","Education","Shopping","Rent","Cash withdrawal",
