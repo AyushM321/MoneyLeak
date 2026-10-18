@@ -1,4 +1,5 @@
 name: MoneyLeak Web Auto Version
+
 on:
   push:
     branches: [main, master]
@@ -6,34 +7,31 @@ on:
       - "version.json"
       - "README.md"
   workflow_dispatch:
+
 permissions:
   contents: write
+
 concurrency:
   group: moneyleak-web-version
   cancel-in-progress: false
+
 jobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Increment version for this update
+      - name: Increment version on every app-file update
         shell: bash
         run: |
-          # The commit that first adds this workflow establishes the starting version.
-          # Only subsequent app updates increment it.
-          if ! git show HEAD^:.github/workflows/version.yml >/dev/null 2>&1; then
-            echo "First installation of version workflow; keeping the supplied starting version."
-            exit 0
-          fi
           node <<'NODE'
           const fs = require('fs');
           const file = 'version.json';
-          let current = { version: '0.5' };
+          let current = { version: '0.6' };
           if (fs.existsSync(file)) {
             try { current = JSON.parse(fs.readFileSync(file, 'utf8')); } catch {}
           }
-          const parts = String(current.version || '0.5').replace(/^v/, '').split('.');
+          const parts = String(current.version || '0.6').replace(/^v/, '').split('.');
           const major = Number(parts[0] || 0);
           const minor = Number(parts[1] || 0) + 1;
           const version = `${major}.${minor}`;
