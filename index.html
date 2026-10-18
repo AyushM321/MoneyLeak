@@ -13,11 +13,23 @@
 <style>
 :root{color-scheme:dark;--bg:#0b1018;--panel:#121b27;--panel2:#0e1723;--border:#29384b;--text:#f1f5f9;--muted:#9aaabd;--green:#45e0a0;--green2:#153a30;--amber:#ffd18a;--red:#ff919d;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text)}
+body{
+ margin:0;
+ background:
+   radial-gradient(ellipse at 8% 0%, rgba(20,91,77,.22) 0%, transparent 34%),
+   radial-gradient(ellipse at 92% 18%, rgba(32,54,91,.24) 0%, transparent 38%),
+   linear-gradient(145deg,#080c13 0%,#0b1018 48%,#0c1420 100%);
+ background-attachment:fixed;
+ color:var(--text)
+}
 button,input,select{font:inherit}
-button{cursor:pointer}
+button{cursor:pointer;transition:transform .16s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+button:hover{transform:translateY(-1px)}
+.btn:hover{box-shadow:0 8px 24px rgba(69,224,160,.12)}
+.panel,.stat,.category{transition:border-color .18s ease,box-shadow .18s ease}
+.panel:hover,.stat:hover,.category:hover{border-color:#344b60;box-shadow:0 10px 28px rgba(0,0,0,.10)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}
-header{background:#0e1520;border-bottom:1px solid var(--border);padding:15px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header{background:rgba(13,20,31,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(69,224,160,.16);padding:15px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:850;letter-spacing:-1px}
 .brand span{color:var(--green)}
 .version-badge{font-size:11px;letter-spacing:0;font-weight:800;color:var(--green);background:#153a30;border:1px solid #285644;border-radius:6px;padding:4px 6px;margin-left:2px;white-space:nowrap}
@@ -133,15 +145,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
  .brand{font-size:18px;gap:7px;letter-spacing:-.7px}
  .logo{width:32px;height:32px}
  .top-nav{gap:5px}
- .privacy.nav-btn{font-size:10px;padding:7px 8px}
- main{margin-top:24px;padding:0 13px 35px}
- .panel{padding:16px}
- .stats{grid-template-columns:1fr}
- .stat{padding:15px}
+ .privacy.nav-btn{font-size:10px;padding:7px 9px}
+ main{margin-top:20px;padding:0 13px 30px}
+ .panel{padding:15px;border-radius:16px}
+ .stats{grid-template-columns:1fr;gap:10px}
+ .stat{padding:13px 15px}
+ .stat p{margin-bottom:6px}
+ .stat strong{font-size:23px}
+ .stat small{margin-top:5px}
+ .category{padding:13px}
+ .intro .btn{min-height:48px}
  .categories{grid-template-columns:1fr}
  .page-heading{display:block}
  .page-heading .back-home{margin-bottom:18px}
  .release-title{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
 </style>
 </head>
@@ -155,10 +175,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v4.0</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v4.1</small>
   </div>
   <nav class="top-nav" aria-label="Main navigation">
-    <button class="privacy nav-btn" id="openHome" type="button">Home</button>
     <button class="privacy nav-btn" id="openHistory" type="button">History <span id="historyCount">0</span></button>
     <button class="privacy nav-btn" id="openMore" type="button">More ⋯</button>
   </nav>
@@ -228,8 +247,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 <section id="moreView" class="app-view hidden">
   <div class="page-heading"><button class="btn ghost back-home" data-view="home" type="button">← Home</button><div><div class="eyebrow">MoneyLeak information</div><h1>More</h1><p class="muted">App information, policies, and release notes.</p></div></div>
   <section class="panel info-panel" id="updatesSection">
-    <div class="section-head"><div><h2>What's new</h2><p class="muted info-subtitle">A short changelog for each app update.</p></div><span class="version-badge">Latest · v4.0</span></div>
-    <article class="release-item"><div class="release-title"><strong>Version 4.0</strong><span class="muted">Latest update</span></div><ul><li>Moved Statement history into its own History page.</li><li>Added a More page for policies and version notes.</li><li>Kept the existing local statement history and report features.</li></ul></article>
+    <div class="section-head"><div><h2>What's new</h2><p class="muted info-subtitle">A short changelog for each app update.</p></div><span class="version-badge">Latest · v4.1</span></div>
+    <article class="release-item"><div class="release-title"><strong>Version 4.1</strong><span class="muted">Latest update</span></div><ul><li>Moved Statement history into its own History page.</li><li>Added a subtle blended background and refined mobile spacing.</li><li>Kept existing statement history, reports, and import features.</li></ul></article>
     <article class="release-item"><div class="release-title"><strong>Version 3.9</strong></div><ul><li>Saved imported transaction data locally on this device.</li><li>Added statement history and restore-after-refresh behavior.</li><li>Automatically closed the import window after successful processing.</li></ul></article>
     <article class="release-item"><div class="release-title"><strong>Version 3.8</strong></div><ul><li>Made the import interface a compact, phone-friendly modal.</li><li>Refreshed the headline and added clear import actions.</li></ul></article>
     <article class="release-item"><div class="release-title"><strong>Version 3.7</strong></div><ul><li>Expanded PDF date recognition for the PhonePe statement format.</li></ul></article>
@@ -691,7 +710,6 @@ function showView(name) {
   $("moreView").classList.toggle("hidden", name !== "more");
   window.scrollTo({top:0, behavior:"smooth"});
 }
-$("openHome").addEventListener("click", () => showView("home"));
 $("openHistory").addEventListener("click", () => showView("history"));
 $("openMore").addEventListener("click", () => showView("more"));
 document.querySelectorAll("[data-view='home']").forEach(button => button.addEventListener("click", () => showView("home")));
