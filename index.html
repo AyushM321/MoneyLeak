@@ -76,7 +76,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.9</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.6</small>
   </div>
   <button class="privacy" id="demo" type="button">Try demo data</button>
 </header>
@@ -283,62 +283,73 @@ async function parsePDF(file) {
  const loaded = await loadPDFLibrary();
  const pdfjs = loaded && (loaded.lib || loaded);
  if (!pdfjs || typeof pdfjs.getDocument !== "function") {
-  throw Error("PDF reader loaded incorrectly. Refresh the page and try again; if it repeats, use CSV for now.");
+  throw Error("PDF reader loaded incorrectly. Refresh and try again, or use CSV.");
  }
- const buffer = await file.arrayBuffer();
- const pdf = await pdfjs.getDocument({data:buffer}).promise;
- const lines = [];
+ const pdf = await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
+ const transactionRows = [];
+ const datePattern = /\b(?:\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*,?\s+\d{4}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b/i;
 
- for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+ for (let pageNo=1; pageNo<=pdf.numPages; pageNo++) {
   $("status").textContent = "Reading PDF page " + pageNo + " of " + pdf.numPages + "…";
   const page = await pdf.getPage(pageNo);
   const content = await page.getTextContent();
-  const items = content.items.filter(x => x.str && x.str.trim()).map(x => ({
-   x:x.transform[4], y:Math.round(x.transform[5] / 3) * 3, text:x.str.trim()
-  }));
-  const grouped = new Map();
-  items.forEach(item => {
-   if (!grouped.has(item.y)) grouped.set(item.y,[]);
-   grouped.get(item.y).push(item);
-  });
-  [...grouped.keys()].sort((a,b) => b-a).forEach(y => {
-   const line = grouped.get(y).sort((a,b) => a.x-b.x).map(x=>x.text).join(" ").replace(/\s+/g," ").trim();
-   if (line) lines.push(line);
-  });
- }
- if (!lines.length) throw Error("This PDF contains no selectable text. Scanned PDFs need OCR; try exporting CSV.");
+  const items = content.items.filter(it=>it.str && it.str.trim()).map(it=>({
+   x:it.transform[4], y:it.transform[5], text:it.str.trim()
+  })).sort((a,b)=>b.y-a.y || a.x-b.x);
 
- const dateRe = /\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b/i;
- const result = [];
- for (const line of lines) {
-  const dm = line.match(dateRe);
-  if (!dm) continue;
-  const rest = line.slice(line.indexOf(dm[0]) + dm[0].length).trim();
-  // PhonePe statement rows explicitly label transaction direction and contain one amount.
-  const phonePeType = /\bCREDIT\b/i.test(rest) ? "income" : (/\bDEBIT\b/i.test(rest) ? "expense" : null);
-  const amounts = [...rest.matchAll(/₹?\s*(\(?-?\d[\d,]*(?:\.\d{1,2})?\)?)(?:\s*(?:CR|DR))?/gi)];
-  if (!amounts.length) continue;
-
-  let amountMatch = null;
-  if (phonePeType) {
-   // PhonePe transaction row has a single amount after DEBIT/CREDIT.
-   amountMatch = amounts[amounts.length - 1];
-  } else {
-   // For other bank formats, prefer the transaction amount before a trailing balance.
-   if (amounts.length < 2) continue;
-   amountMatch = amounts[amounts.length - 2];
+  // Cluster nearby baselines with a tolerance. PDF.js can give adjacent columns
+  // slightly different y coordinates, so exact/rounded equality can split a row.
+  const lines=[];
+  for (const item of items) {
+   let line=lines.find(l=>Math.abs(l.y-item.y)<=6);
+   if (!line) { line={y:item.y,items:[]}; lines.push(line); }
+   line.items.push(item);
+   line.y=line.items.reduce((sum,v)=>sum+v.y,0)/line.items.length;
   }
-  const raw = amountMatch[1].trim();
-  const value = Number(raw.replace(/[,\s()]/g,""));
-  if (!Number.isFinite(value) || value === 0) continue;
-
-  let description = rest.slice(0, amountMatch.index).replace(/\s+/g," ").trim();
-  description = description.replace(/\b(?:DEBIT|CREDIT)\b/ig, "").trim();
-  if (!description || /opening balance|closing balance|brought forward|carried forward/i.test(description)) continue;
-  let type = phonePeType || (/\bCR\b/i.test(amountMatch[0]) ? "income" : "expense");
-  result.push({date:dm[0], description, amount:Math.abs(value), type, category:categorize(description)});
+  lines.sort((a,b)=>b.y-a.y);
+  for (const line of lines) {
+   line.items.sort((a,b)=>a.x-b.x);
+   const text=line.items.map(it=>it.text).join(" ").replace(/\s+/g," ").trim();
+   if (datePattern.test(text) && /\b(?:DEBIT|CREDIT)\b/i.test(text) && /₹?\s*\d[\d,]*(?:\.\d{1,2})?/.test(text)) {
+    transactionRows.push(text);
+   }
+  }
  }
- if (!result.length) throw Error("No transactions could be read from this PDF. Try the PhonePe CSV export instead.");
+ if (!transactionRows.length) {
+  throw Error("No transaction rows found in this PDF. It may have an unsupported layout. CSV import works for this statement, so use the PhonePe CSV for now.");
+ }
+
+ const result=[];
+ for (const line of transactionRows) {
+  const dm=line.match(datePattern);
+  if (!dm) continue;
+  const date=dm[0];
+  const afterDate=line.slice(line.indexOf(date)+date.length).trim();
+  const typeMatch=afterDate.match(/\b(DEBIT|CREDIT)\b/i);
+  if (!typeMatch) continue;
+  const type=typeMatch[1].toUpperCase()==="CREDIT" ? "income" : "expense";
+  const beforeType=afterDate.slice(0,typeMatch.index).trim();
+  const afterType=afterDate.slice(typeMatch.index+typeMatch[0].length).trim();
+  const amountMatches=[...afterType.matchAll(/₹\s*([\d,]+(?:\.\d{1,2})?)|(?:^|\s)([\d,]+(?:\.\d{1,2})?)(?=\s*$)/g)];
+  let amountText="";
+  if (amountMatches.length) {
+   const m=amountMatches[amountMatches.length-1];
+   amountText=m[1] || m[2] || "";
+  }
+  // Prefer the currency amount explicitly following DEBIT/CREDIT.
+  if (!amountText) {
+   const m=afterType.match(/([\d,]+(?:\.\d{1,2})?)/);
+   if (m) amountText=m[1];
+  }
+  const amount=Number(amountText.replace(/,/g,""));
+  if (!Number.isFinite(amount) || amount<=0) continue;
+  const description=beforeType.replace(/\s+/g," ").trim();
+  if (!description || /opening balance|closing balance|brought forward|carried forward/i.test(description)) continue;
+  result.push({date,description,amount,type,category:categorize(description)});
+ }
+ if (!result.length) {
+  throw Error("The PDF text was read, but transaction rows could not be interpreted. Use the PhonePe CSV export for this statement.");
+ }
  return result;
 }
 
