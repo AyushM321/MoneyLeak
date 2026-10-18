@@ -76,7 +76,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.6</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.7</small>
   </div>
   <button class="privacy" id="demo" type="button">Try demo data</button>
 </header>
@@ -287,7 +287,7 @@ async function parsePDF(file) {
  }
  const pdf = await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
  const transactionRows = [];
- const datePattern = /\b(?:\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*,?\s+\d{4}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b/i;
+ const datePattern = /\b(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*,?\s+\d{4}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b/i;
 
  for (let pageNo=1; pageNo<=pdf.numPages; pageNo++) {
   $("status").textContent = "Reading PDF page " + pageNo + " of " + pdf.numPages + "…";
