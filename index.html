@@ -3,75 +3,62 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1018">
-<title>MoneyLeak — Understand Your Money</title>
+<title>MoneyLeak | Personal Finance Insights</title>
 <style>
-:root{
-  color-scheme:dark;
-  --bg:#0b1018;--panel:#121b27;--panel2:#172332;
-  --border:#273649;--text:#f1f5f9;--muted:#9aaabd;
-  --green:#45e0a0;--green2:#143b30;--blue:#7cb9ff;
-  --amber:#ffd18a;--red:#ff919d;
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif
-}
+:root{color-scheme:dark;--bg:#0b1018;--panel:#121b27;--panel2:#0e1723;--border:#29384b;--text:#f1f5f9;--muted:#9aaabd;--green:#45e0a0;--green2:#153a30;--amber:#ffd18a;--red:#ff919d;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text)}
 button,input,select{font:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}
-header{background:#0e1520;border-bottom:1px solid var(--border);padding:16px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
-.brand{display:flex;align-items:center;gap:11px;font-size:24px;font-weight:850;letter-spacing:-1px}
-.logo{width:42px;height:42px;flex-shrink:0}
+header{background:#0e1520;border-bottom:1px solid var(--border);padding:15px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-size:24px;font-weight:850;letter-spacing:-1px}
 .brand span{color:var(--green)}
-.privacy{color:var(--green);font-size:12px;border:1px solid #275b49;border-radius:30px;padding:7px 11px}
-main{max-width:1100px;margin:34px auto;padding:0 18px 50px}
+.logo{width:42px;height:42px;flex-shrink:0}
+.privacy{color:var(--green);font-size:12px;border:1px solid #275b49;border-radius:30px;padding:7px 10px}
+main{max-width:1100px;margin:32px auto;padding:0 18px 45px}
 .eyebrow{color:var(--green);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}
-h1{font-size:clamp(30px,5vw,46px);letter-spacing:-1.7px;line-height:1.12;margin:12px 0}
+h1{font-size:clamp(30px,5vw,46px);letter-spacing:-1.7px;line-height:1.15;margin:12px 0}
 h2{font-size:19px;margin:0 0 8px}
 p{line-height:1.65}
 .muted{color:var(--muted)}
-.intro{margin-bottom:28px;max-width:720px}
+.intro{margin-bottom:28px;max-width:740px}
 .panel,.stat,.category{background:var(--panel);border:1px solid var(--border);border-radius:17px}
-.panel{padding:23px;margin-bottom:20px}
-.upload{border:1px dashed #40546a;background:#0d1520;border-radius:14px;padding:27px 15px;text-align:center;margin-top:18px}
-.upload-icon{width:48px;height:48px;margin:0 auto 12px;color:var(--green)}
-input[type=file]{display:block;max-width:100%;margin:18px auto;color:var(--muted)}
-.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-weight:750;background:var(--green);color:#062218}
-.btn:hover{filter:brightness(1.08)}
+.panel{padding:22px;margin-bottom:20px}
+.upload{border:1px dashed #40546a;background:var(--panel2);border-radius:14px;padding:26px 14px;text-align:center;margin-top:17px}
+.upload-icon{width:45px;height:45px;color:var(--green);margin-bottom:10px}
+input[type=file]{display:block;max-width:100%;margin:17px auto;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:11px 15px;font-weight:750;background:var(--green);color:#062218}
 .btn.secondary{background:var(--green2);color:var(--green);border-color:#285644}
 .btn.ghost{background:transparent;color:var(--text);border-color:var(--border)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.status{font-size:13px;overflow-wrap:anywhere}
-.notice{font-size:12px;line-height:1.7;color:var(--amber);background:#2a2114;border:1px solid #554126;border-radius:10px;padding:13px;margin-top:16px}
+.btn:disabled{opacity:.5;cursor:wait}
+.status{font-size:13px;overflow-wrap:anywhere;white-space:pre-wrap}
+.notice{font-size:12px;line-height:1.7;color:var(--amber);background:#2a2114;border:1px solid #554126;border-radius:10px;padding:13px;margin-top:15px}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:20px}
-.stat{padding:19px;min-width:0}
+.stat{padding:18px;min-width:0}
 .stat p{font-size:13px;color:var(--muted);margin:0 0 12px}
-.stat strong{font-size:clamp(19px,3.3vw,28px);overflow-wrap:anywhere}
+.stat strong{font-size:clamp(18px,3.5vw,28px);overflow-wrap:anywhere}
 .stat small{display:block;color:var(--muted);margin-top:8px}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
-.category{padding:16px;min-width:0}
+.categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:17px}
+.category{padding:15px;min-width:0}
 .cat-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-weight:750}
-.cat-top span:last-child{overflow-wrap:anywhere;text-align:right}
+.cat-top span:last-child{text-align:right;overflow-wrap:anywhere}
 .bar{height:7px;background:#263446;border-radius:10px;margin:12px 0;overflow:hidden}
 .bar div{height:100%;background:var(--green);border-radius:10px}
-.insights{display:grid;gap:12px;margin-top:17px}
+.insights{display:grid;gap:12px;margin-top:16px}
 .insight{background:#162b27;border:1px solid #285043;border-radius:12px;padding:15px;line-height:1.6}
-.insight strong{display:block;margin-bottom:4px;color:var(--green)}
-.table-wrap{overflow-x:auto;margin-top:16px}
+.insight strong{display:block;color:var(--green);margin-bottom:4px}
+.table-wrap{overflow-x:auto;margin-top:15px}
 table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}
-th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--border)}
-th{color:var(--muted);font-weight:700}
-select{background:#0e1723;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;max-width:165px}
+th,td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--border)}
+th{color:var(--muted)}
+select{max-width:170px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
 .hidden{display:none!important}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:25px 12px}
-@media(max-width:600px){
- header{padding:14px 16px}.brand{font-size:21px}.logo{width:36px;height:36px}
- main{margin-top:25px;padding:0 13px 35px}.panel{padding:17px}
- .stats{grid-template-columns:1fr}.stat{padding:16px}
- .categories{grid-template-columns:1fr}.privacy{font-size:10px}
-}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
+@media(max-width:600px){header{padding:13px 15px}.brand{font-size:21px}.logo{width:36px;height:36px}.privacy{font-size:10px}main{margin-top:24px;padding:0 13px 35px}.panel{padding:16px}.stats{grid-template-columns:1fr}.stat{padding:15px}.categories{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -90,220 +77,291 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px 12px}
 </header>
 
 <main>
-  <section class="intro">
-    <div class="eyebrow">Your personal finance companion</div>
-    <h1>Know where your money <span style="color:var(--green)">goes.</span></h1>
-    <p class="muted">Understand spending habits, uncover potential money leaks, and find realistic ways to save — without connecting your bank account.</p>
-  </section>
+<section class="intro">
+  <div class="eyebrow">Your personal finance companion</div>
+  <h1>Know where your money <span style="color:var(--green)">goes.</span></h1>
+  <p class="muted">Understand spending habits, discover potential money leaks, and find realistic ways to save — without connecting your bank account.</p>
+</section>
 
-  <section class="panel">
-    <h2>Import your statement</h2>
-    <p class="muted">Choose a CSV or PDF statement. Files are processed in your browser, not uploaded to a MoneyLeak server.</p>
-    <div class="upload">
-      <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <path d="M24 31V7m0 0L15 16m9-9 9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M9 29v10a3 3 0 0 0 3 3h24a3 3 0 0 0 3-3V29" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-      <strong>Select your bank statement</strong>
-      <p class="muted" style="font-size:13px">Supported files: .CSV and text-based .PDF (up to 10 MB)</p>
-      <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Choose bank statement">
-      <button class="btn secondary" id="demo">Try demo data</button>
-    </div>
-    <p id="status" class="muted status" role="status" aria-live="polite">No statement loaded yet.</p>
-    <div class="notice">Privacy: remove account numbers and personal details before selecting a statement. Never provide your bank password, PIN, or OTP. Scanned/image-only PDFs may not contain readable text. Always verify extracted amounts and categories.</div>
-  </section>
-
-  <div id="report" class="hidden">
-    <section class="stats">
-      <div class="stat"><p>Total income</p><strong id="income">₹0</strong><small>Detected money received</small></div>
-      <div class="stat"><p>Total expenses</p><strong id="expenses">₹0</strong><small>Detected money spent</small></div>
-      <div class="stat"><p>Net cash flow</p><strong id="balance">₹0</strong><small>Income minus expenses</small></div>
-    </section>
-
-    <section class="panel">
-      <div class="section-head"><h2>Spending breakdown</h2><button id="reset" class="btn ghost">Clear data</button></div>
-      <p class="muted">Estimates based on transaction descriptions. Edit categories and check transaction signs before relying on the totals.</p>
-      <div id="categories" class="categories"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Potential money leaks</h2>
-      <p class="muted">Helpful clues to investigate, not judgments about your purchases.</p>
-      <div id="insights" class="insights"></div>
-    </section>
-
-    <section class="panel">
-      <div class="section-head"><h2>Transactions</h2><button id="export" class="btn secondary">Export CSV</button></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Category</th></tr></thead>
-          <tbody id="transactions"></tbody>
-        </table>
-      </div>
-    </section>
+<section class="panel">
+  <h2>Import your statement</h2>
+  <p class="muted">Choose a CSV or text-based PDF statement. Processing happens in your browser.</p>
+  <div class="upload">
+    <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d="M24 31V7m0 0-9 9m9-9 9 9M9 29v10a3 3 0 0 0 3 3h24a3 3 0 0 0 3-3V29" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div><strong>Select your bank statement</strong></div>
+    <p class="muted" style="font-size:13px">CSV or text-based PDF · Maximum 10 MB</p>
+    <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Select bank statement">
+    <button class="btn secondary" id="demo" type="button">Try demo data</button>
   </div>
-  <footer>MoneyLeak v2 · Your data stays in your browser · Verify all estimates</footer>
+  <p id="status" class="muted status" role="status" aria-live="polite">Ready. Choose a statement or try demo data.</p>
+  <div class="notice">Privacy: your statement is not sent to a MoneyLeak server. PDF.js is loaded from a public CDN. Never upload banking passwords, PINs, or OTPs. Scanned PDFs may require OCR and are not supported by this reader. Always verify the results.</div>
+</section>
+
+<div id="report" class="hidden">
+<section class="stats">
+  <div class="stat"><p>Total income</p><strong id="income">₹0</strong><small>Detected incoming money</small></div>
+  <div class="stat"><p>Total expenses</p><strong id="expenses">₹0</strong><small>Detected outgoing money</small></div>
+  <div class="stat"><p>Net cash flow</p><strong id="balance">₹0</strong><small>Income minus expenses</small></div>
+</section>
+<section class="panel">
+  <div class="section-head"><h2>Spending breakdown</h2><button class="btn ghost" id="reset" type="button">Clear data</button></div>
+  <p class="muted">Categories are estimates based on descriptions. Edit them where needed.</p>
+  <div id="categories" class="categories"></div>
+</section>
+<section class="panel">
+  <h2>Potential money leaks</h2>
+  <p class="muted">These are suggestions to investigate, not judgments about essential spending.</p>
+  <div id="insights" class="insights"></div>
+</section>
+<section class="panel">
+  <div class="section-head"><h2>Transactions</h2><button class="btn secondary" id="export" type="button">Export CSV</button></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Category</th></tr></thead>
+      <tbody id="transactions"></tbody>
+    </table>
+  </div>
+</section>
+</div>
+<footer>MoneyLeak · Personal finance insights · Verify estimates before making financial decisions</footer>
 </main>
 
-<!-- PDF.js extracts text locally in your browser. It does not send the statement to a server. -->
- <script> window.loadMoneyLeakPdfJs = function () {   if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);    if (window.moneyLeakPdfPromise) return window.moneyLeakPdfPromise;    const urls = [     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",     "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"   ];    window.moneyLeakPdfPromise = (async () => {     for (const url of urls) {       try {         await new Promise((resolve, reject) => {           const script = document.createElement("script");           script.src = url;           script.onload = resolve;           script.onerror = () => {             script.remove();             reject(new Error("PDF library could not load"));           };           document.head.appendChild(script);         });          if (window.pdfjsLib) {           window.pdfjsLib.GlobalWorkerOptions.workerSrc =             url.includes("cdnjs.cloudflare.com")               ? "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"               : "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";            return window.pdfjsLib;         }       } catch (error) {         // Try the next CDN.       }     }      window.moneyLeakPdfPromise = null;     throw new Error(       "PDF reader could not load. Check your internet connection or try a CSV statement."     );   })();    return window.moneyLeakPdfPromise; }; </script>
 <script>
-(() => {
 "use strict";
+(() => {
 const $ = id => document.getElementById(id);
 const money = n => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(n);
 let transactions = [];
-
-const categoriesList = [
+let pdfPromise = null;
+const categoryNames = [
  "Food & groceries","Transport","Utilities & bills","Subscriptions",
  "Healthcare","Education","Shopping","Rent","Cash withdrawal",
  "Bank fees","Transfers","Salary","Other income","Other spending"
 ];
 
-function categorize(description){
- const d=description.toLowerCase();
- if(/salary|payroll|wages|stipend/.test(d))return "Salary";
- if(/interest credited|dividend|refund received/.test(d))return "Other income";
- if(/rent|landlord/.test(d))return "Rent";
- if(/grocery|grocer|supermarket|vegetable|milk|food|restaurant|cafe|swiggy|zomato/.test(d))return "Food & groceries";
- if(/uber|ola|rapido|petrol|fuel|metro|bus|train|transport/.test(d))return "Transport";
- if(/electricity|water bill|gas bill|broadband|wifi|mobile recharge|phone bill/.test(d))return "Utilities & bills";
- if(/netflix|spotify|prime video|subscription|membership/.test(d))return "Subscriptions";
- if(/hospital|pharmacy|medical|doctor|medicine|clinic/.test(d))return "Healthcare";
- if(/school|college|tuition|course|education/.test(d))return "Education";
- if(/amazon|flipkart|shopping|clothing|fashion|myntra/.test(d))return "Shopping";
- if(/atm|cash withdrawal/.test(d))return "Cash withdrawal";
- if(/transfer|upi|imps|neft|rtgs|sent to|received from/.test(d))return "Transfers";
- if(/fee|charge|penalty/.test(d))return "Bank fees";
+function categorize(description) {
+ const d = description.toLowerCase();
+ if (/salary|payroll|wages|stipend/.test(d)) return "Salary";
+ if (/interest credited|dividend|refund received/.test(d)) return "Other income";
+ if (/rent|landlord/.test(d)) return "Rent";
+ if (/grocery|supermarket|vegetable|milk|restaurant|cafe|swiggy|zomato|food/.test(d)) return "Food & groceries";
+ if (/uber|ola|rapido|petrol|fuel|metro|bus|train|transport/.test(d)) return "Transport";
+ if (/electricity|water bill|gas bill|broadband|wifi|recharge|phone bill/.test(d)) return "Utilities & bills";
+ if (/netflix|spotify|prime video|subscription|membership/.test(d)) return "Subscriptions";
+ if (/hospital|pharmacy|medical|doctor|medicine|clinic/.test(d)) return "Healthcare";
+ if (/school|college|tuition|course|education/.test(d)) return "Education";
+ if (/amazon|flipkart|shopping|clothing|fashion|myntra/.test(d)) return "Shopping";
+ if (/atm|cash withdrawal/.test(d)) return "Cash withdrawal";
+ if (/transfer|upi|imps|neft|rtgs|sent to|received from/.test(d)) return "Transfers";
+ if (/fee|charge|penalty/.test(d)) return "Bank fees";
  return "Other spending";
 }
 
-function parseCSV(text){
- const rows=[];let row=[],cell="",quoted=false;
- text=text.replace(/^\uFEFF/,"");
- for(let i=0;i<text.length;i++){
-  const c=text[i];
-  if(c==='"'&&quoted&&text[i+1]==='"'){cell+='"';i++}
-  else if(c==='"')quoted=!quoted;
-  else if(c===","&&!quoted){row.push(cell);cell=""}
-  else if((c==="\n"||c==="\r")&&!quoted){
-   if(c==="\r"&&text[i+1]==="\n")i++;
-   row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell="";
-  }else cell+=c;
+function parseCSV(text) {
+ const rows = [];
+ let row = [], cell = "", quoted = false;
+ text = text.replace(/^\uFEFF/, "");
+ for (let i = 0; i < text.length; i++) {
+  const c = text[i];
+  if (c === '"' && quoted && text[i+1] === '"') { cell += '"'; i++; }
+  else if (c === '"') quoted = !quoted;
+  else if (c === ',' && !quoted) { row.push(cell); cell = ""; }
+  else if ((c === '\n' || c === '\r') && !quoted) {
+   if (c === '\r' && text[i+1] === '\n') i++;
+   row.push(cell);
+   if (row.some(v => v.trim())) rows.push(row);
+   row = []; cell = "";
+  } else cell += c;
  }
- if(cell.length||row.length){row.push(cell);if(row.some(v=>v.trim()))rows.push(row)}
- if(rows.length<2)throw Error("CSV needs a header row and transaction rows.");
- const headers=rows[0].map(x=>x.trim().toLowerCase());
- const find=names=>headers.findIndex(h=>names.some(n=>h===n||h.includes(n)));
- const dateI=find(["date","transaction date","txn date","value date"]);
- const descI=find(["description","narration","particulars","details","merchant"]);
- const amountI=find(["amount","transaction amount"]);
- const debitI=find(["debit","withdrawal","money out"]);
- const creditI=find(["credit","deposit","money in"]);
- if(descI<0||(amountI<0&&(debitI<0||creditI<0)))throw Error("Could not identify columns. Use Date, Description, Amount or Date, Description, Debit, Credit.");
- const num=s=>{const v=String(s||"").trim().replace(/[₹,\s]/g,"");if(!v)return 0;const n=Number(v.replace(/^\((.*)\)$/,"-$1"));return Number.isFinite(n)?n:NaN};
- return rows.slice(1).map(r=>{
-  const description=(r[descI]||"").trim();if(!description)return null;
-  let amount,type;
-  if(amountI>=0){
-   const n=num(r[amountI]);if(!Number.isFinite(n)||n===0)return null;
-   amount=Math.abs(n);type=n>0?"income":"expense";
-  }else{
-   const debit=num(r[debitI]),credit=num(r[creditI]);
-   if(!Number.isFinite(debit)||!Number.isFinite(credit))return null;
-   if(debit>0){amount=debit;type="expense"}
-   else if(credit>0){amount=credit;type="income"}else return null;
+ if (cell.length || row.length) { row.push(cell); if (row.some(v => v.trim())) rows.push(row); }
+ if (rows.length < 2) throw Error("CSV must contain column headings and transaction rows.");
+
+ const headers = rows[0].map(x => x.trim().toLowerCase());
+ const find = names => headers.findIndex(h => names.some(n => h === n || h.includes(n)));
+ const dateI = find(["date","transaction date","txn date","value date"]);
+ const descI = find(["description","narration","particulars","details","merchant"]);
+ const amountI = find(["amount","transaction amount"]);
+ const debitI = find(["debit","withdrawal","money out"]);
+ const creditI = find(["credit","deposit","money in"]);
+
+ if (descI < 0 || (amountI < 0 && debitI < 0 && creditI < 0))
+  throw Error("Could not identify columns. Try Date, Description, Amount or Date, Description, Debit, Credit.");
+
+ const num = s => {
+  const v = String(s || "").trim().replace(/[₹,\s]/g,"");
+  if (!v) return 0;
+  const n = Number(v.replace(/^\((.*)\)$/,"-$1"));
+  return Number.isFinite(n) ? n : NaN;
+ };
+
+ return rows.slice(1).map(r => {
+  const description = (r[descI] || "").trim();
+  if (!description) return null;
+  let amount, type;
+  if (amountI >= 0) {
+   const n = num(r[amountI]);
+   if (!Number.isFinite(n) || n === 0) return null;
+   amount = Math.abs(n);
+   type = n > 0 ? "income" : "expense";
+  } else {
+   const debit = num(r[debitI]), credit = num(r[creditI]);
+   if (!Number.isFinite(debit) || !Number.isFinite(credit)) return null;
+   if (debit > 0) { amount = debit; type = "expense"; }
+   else if (credit > 0) { amount = credit; type = "income"; }
+   else return null;
   }
-  return {date:dateI>=0?(r[dateI]||""):"",description,amount,type,category:categorize(description)};
+  return {date:dateI >= 0 ? (r[dateI] || "") : "",description,amount,type,category:categorize(description)};
  }).filter(Boolean);
 }
 
-// PDF extraction is best-effort: bank layouts differ, so every result needs review.
-async function parsePDF(file){
- if(!window.pdfjsLib)throw Error("The PDF reader did not load. Check your internet connection, refresh the page, and try again.");
- pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
- const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
- let lines=[];
- for(let p=1;p<=pdf.numPages;p++){
-  $("status").textContent="Reading PDF page "+p+" of "+pdf.numPages+"…";
-  const page=await pdf.getPage(p);
-  const content=await page.getTextContent();
-  const groups={};
-  for(const item of content.items){
-   if(!item.str||!item.str.trim())continue;
-   const y=Math.round(item.transform[5]/3)*3;
-   (groups[y]||(groups[y]=[])).push({x:item.transform[4],text:item.str});
+function loadPDFLibrary() {
+ if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+ if (pdfPromise) return pdfPromise;
+
+ pdfPromise = (async () => {
+  const sources = [
+   {
+    script:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+    worker:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"
+   },
+   {
+    script:"https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js",
+    worker:"https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"
+   }
+  ];
+
+  for (const source of sources) {
+   try {
+    await new Promise((resolve,reject) => {
+     const script = document.createElement("script");
+     script.src = source.script;
+     script.onload = resolve;
+     script.onerror = () => { script.remove(); reject(Error("CDN unavailable")); };
+     document.head.appendChild(script);
+    });
+    if (window.pdfjsLib) {
+     window.pdfjsLib.GlobalWorkerOptions.workerSrc = source.worker;
+     return {lib:window.pdfjsLib,worker:source.worker};
+    }
+   } catch (e) { /* Try the next source. */ }
   }
-  Object.keys(groups).sort((a,b)=>Number(b)-Number(a)).forEach(y=>{
-   const line=groups[y].sort((a,b)=>a.x-b.x).map(x=>x.text).join(" ").replace(/\s+/g," ").trim();
-   if(line)lines.push(line);
-  });
- }
- if(!lines.length)throw Error("No readable text found. This may be a scanned PDF. Try exporting a CSV from your bank.");
- const datePattern=/\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b/i;
- const amountPattern=/\(?-?\d[\d,]*\.\d{2}\)?(?:\s*(?:CR|DR))?/gi;
- const found=[];
- for(const line of lines){
-  const dm=line.match(datePattern);if(!dm)continue;
-  const date=dm[0],idx=line.indexOf(date);
-  let desc=line.slice(idx+date.length).trim();
-  const vals=desc.match(amountPattern)||[];
-  if(!vals.length)continue;
-  // The last amount is often the running balance. Prefer the preceding
-  // amount when available; statement formats must still be checked manually.
-  const raw=vals.length>=2?vals[vals.length-2]:vals[vals.length-1];
-  let value=Number(raw.replace(/CR|DR/gi,"").replace(/[,\s()]/g,""));
-  if(!Number.isFinite(value)||value===0)continue;
-  let cleanDesc=desc.replace(amountPattern," ").replace(/\s+/g," ").trim();
-  const debit=/\b(debit|withdrawal|paid|purchase|dr)\b/i.test(line);
-  const credit=/\b(credit|deposit|salary|refund|received|cr)\b/i.test(line);
-  let type=value<0?"expense":credit&&!debit?"income":"expense";
-  if(/\bCR\b/i.test(raw))type="income";
-  if(/\bDR\b/i.test(raw))type="expense";
-  found.push({date,description:cleanDesc||"PDF transaction — verify description",amount:Math.abs(value),type,category:categorize(cleanDesc)});
- }
- if(!found.length)throw Error("Couldn't reliably identify transaction rows in this PDF. Export your statement as CSV if your bank offers it.");
- return found;
+  pdfPromise = null;
+  throw Error("Could not load the PDF reader. Check your internet connection and refresh the page.");
+ })();
+ return pdfPromise;
 }
 
-function analyze(data){
- transactions=data;
- $("report").classList.remove("hidden");
- const income=data.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
- const expenses=data.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
- $("income").textContent=money(income);$("expenses").textContent=money(expenses);$("balance").textContent=money(income-expenses);
+// Extract text locally. Bank statement layouts differ; this parser deliberately
+// accepts only rows it can interpret and asks users to verify every result.
+async function parsePDF(file) {
+ const loaded = await loadPDFLibrary();
+ const pdfjs = loaded.lib;
+ const buffer = await file.arrayBuffer();
+ const pdf = await pdfjs.getDocument({data:buffer}).promise;
+ const lines = [];
 
- const totals={};
- data.filter(t=>t.type==="expense"&&t.category!=="Transfers").forEach(t=>totals[t.category]=(totals[t.category]||0)+t.amount);
- const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+ for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+  $("status").textContent = "Reading PDF page " + pageNo + " of " + pdf.numPages + "…";
+  const page = await pdf.getPage(pageNo);
+  const content = await page.getTextContent();
+  const items = content.items.filter(x => x.str && x.str.trim()).map(x => ({
+   x:x.transform[4], y:Math.round(x.transform[5] / 3) * 3, text:x.str.trim()
+  }));
+  const grouped = new Map();
+  items.forEach(item => {
+   if (!grouped.has(item.y)) grouped.set(item.y,[]);
+   grouped.get(item.y).push(item);
+  });
+  [...grouped.keys()].sort((a,b) => b-a).forEach(y => {
+   const line = grouped.get(y).sort((a,b) => a.x-b.x).map(x=>x.text).join(" ").replace(/\s+/g," ").trim();
+   if (line) lines.push(line);
+  });
+ }
+ if (!lines.length) throw Error("This PDF contains no selectable text. Scanned PDFs need OCR; try exporting CSV.");
+
+ const dateRe = /\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b/i;
+ const amountRe = /(?:\(?-?\d[\d,]*\.\d{2}\)?|\(?-?\d[\d,]{2,}\)?)(?:\s*(?:CR|DR))?/gi;
+ const result = [];
+
+ for (const line of lines) {
+  const dm = line.match(dateRe);
+  if (!dm) continue;
+  const rest = line.slice(line.indexOf(dm[0]) + dm[0].length).trim();
+  const amounts = [...rest.matchAll(amountRe)];
+  if (!amounts.length) continue;
+
+  // Most statements list transaction amount before running balance.
+  // Do not guess when the row has only a single ambiguous amount.
+  if (amounts.length < 2) continue;
+  const match = amounts[amounts.length - 2];
+  const raw = match[0].trim();
+  const cleaned = raw.replace(/\b(CR|DR)\b/gi,"").replace(/[,\s()]/g,"");
+  let value = Number(cleaned);
+  if (!Number.isFinite(value) || value === 0) continue;
+
+  const description = rest.slice(0,match.index).replace(/\s+/g," ").trim();
+  if (!description || /opening balance|closing balance|brought forward|carried forward/i.test(description)) continue;
+
+  let type = value < 0 ? "expense" : "expense";
+  if (/\bCR\b/i.test(raw)) type = "income";
+  else if (/\bDR\b/i.test(raw)) type = "expense";
+
+  result.push({
+   date:dm[0],description,amount:Math.abs(value),type,category:categorize(description)
+  });
+ }
+ if (!result.length) {
+  throw Error("Could not reliably read transaction rows from this PDF. Please use a CSV export if available. PDF formats differ between banks.");
+ }
+ return result;
+}
+
+function analyze(data) {
+ transactions = data;
+ $("report").classList.remove("hidden");
+
+ const income = data.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+ const expenses = data.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+ $("income").textContent = money(income);
+ $("expenses").textContent = money(expenses);
+ $("balance").textContent = money(income-expenses);
+
+ const totals = {};
+ data.filter(t=>t.type==="expense" && t.category!=="Transfers").forEach(t=>{
+  totals[t.category] = (totals[t.category]||0) + t.amount;
+ });
+ const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
  $("categories").replaceChildren();
- if(!sorted.length)$("categories").textContent="No expenses detected.";
+
+ if (!sorted.length) $("categories").textContent = "No expenses detected.";
  sorted.forEach(([name,value])=>{
-  const el=document.createElement("div");el.className="category";
-  const top=document.createElement("div");top.className="cat-top";
-  const label=document.createElement("span");label.textContent=name;
-  const amount=document.createElement("span");amount.textContent=money(value);
+  const el = document.createElement("div"); el.className="category";
+  const top = document.createElement("div"); top.className="cat-top";
+  const label = document.createElement("span"); label.textContent=name;
+  const amount = document.createElement("span"); amount.textContent=money(value);
   top.append(label,amount);
-  const bar=document.createElement("div");bar.className="bar";
-  const fill=document.createElement("div");fill.style.width=(expenses?Math.min(100,value/expenses*100):0)+"%";
-  bar.append(fill);el.append(top,bar);
-  const pct=document.createElement("small");pct.className="muted";pct.textContent=(expenses?value/expenses*100:0).toFixed(1)+"% of expenses";
-  el.append(pct);$("categories").append(el);
+  const bar = document.createElement("div"); bar.className="bar";
+  const fill = document.createElement("div");
+  fill.style.width = (expenses ? Math.min(100,value/expenses*100) : 0) + "%";
+  bar.append(fill); el.append(top,bar);
+  const pct = document.createElement("small"); pct.className="muted";
+  pct.textContent = (expenses ? value/expenses*100 : 0).toFixed(1) + "% of expenses";
+  el.append(pct); $("categories").append(el);
  });
 
  const tips=[];
  const subs=data.filter(t=>t.type==="expense"&&t.category==="Subscriptions").reduce((s,t)=>s+t.amount,0);
- if(subs>0)tips.push(["Review subscriptions","Found "+money(subs)+" in subscription-labelled transactions. Check which services you still use."]);
- const fees=totals["Bank fees"]||0;
- if(fees>0)tips.push(["Check bank charges","Found "+money(fees)+" in fee-like transactions. Verify whether any charges can be avoided."]);
- const shopping=totals["Shopping"]||0;
- if(expenses>0&&shopping/expenses>=.2)tips.push(["Review shopping spending","Shopping is "+(shopping/expenses*100).toFixed(1)+"% of detected expenses. Decide whether this matches your priorities."]);
+ const fees=totals["Bank fees"]||0, shopping=totals["Shopping"]||0;
  const transfers=data.filter(t=>t.category==="Transfers").reduce((s,t)=>s+t.amount,0);
- if(transfers>0)tips.push(["Review transfers separately","Found "+money(transfers)+" in transfer-labelled transactions. Internal transfers are not necessarily spending."]);
- const cash=totals["Cash withdrawal"]||0;
- if(cash>0)tips.push(["Track cash purchases","Cash withdrawals total "+money(cash)+". Add cash purchases for a more complete picture."]);
- if(income>0&&expenses>income)tips.push(["Spending exceeds income","Detected expenses exceed detected income. Check statement period, missing income, and transfers first."]);
- if(!tips.length)tips.push(["Review your biggest categories","Start with the largest category and choose one realistic change that fits your needs."]);
+ if(subs>0)tips.push(["Review subscriptions","Found "+money(subs)+" in subscription-labelled transactions. Check which services you still use."]);
+ if(fees>0)tips.push(["Review bank fees","Found "+money(fees)+" in fee-like transactions. Verify whether any can be avoided."]);
+ if(expenses>0&&shopping/expenses>=.2)tips.push(["Review shopping spending","Shopping is "+(shopping/expenses*100).toFixed(1)+"% of detected expenses. Compare it with your priorities."]);
+ if(transfers>0)tips.push(["Review transfers separately","Transfer-labelled transactions total "+money(transfers)+". Transfers between your own accounts are not necessarily spending."]);
+ if(income>0&&expenses>income)tips.push(["Expenses exceed income","Check the statement period, missing income, and transfers before drawing conclusions."]);
+ if(!tips.length)tips.push(["Review your biggest categories","Start with the largest category and choose a realistic change that fits your needs."]);
+
  $("insights").replaceChildren();
  tips.forEach(([title,body])=>{
   const el=document.createElement("div");el.className="insight";
@@ -318,25 +376,37 @@ function analyze(data){
   [t.date,t.description,(t.type==="income"?"+":"−")+money(t.amount),t.type].forEach(v=>{
    const td=document.createElement("td");td.textContent=v;tr.append(td);
   });
-  const td=document.createElement("td");const select=document.createElement("select");
-  [...new Set([t.category,...categoriesList])].forEach(c=>{
-   const o=document.createElement("option");o.value=c;o.textContent=c;if(c===t.category)o.selected=true;select.append(o);
+  const td=document.createElement("td"), select=document.createElement("select");
+  [...new Set([t.category,...categoryNames])].forEach(c=>{
+   const option=document.createElement("option");option.value=c;option.textContent=c;
+   if(c===t.category)option.selected=true;
+   select.append(option);
   });
-  select.addEventListener("change",()=>{t.category=select.value;analyze(transactions)});
+  select.addEventListener("change",()=>{t.category=select.value;analyze(transactions);});
   td.append(select);tr.append(td);tbody.append(tr);
  });
 }
 
- $("file").addEventListener("change", async e => {   const file = e.target.files[0];   if (!file) return;    try {     if (file.size > 10 * 1024 * 1024) {       throw new Error("File too large. Choose a file under 10 MB.");     }      const isPDF = /\.pdf$/i.test(file.name);     const isCSV = /\.csv$/i.test(file.name);      if (!isPDF && !isCSV) {       throw new Error("Please select a PDF or CSV file.");     }      $("status").textContent = isPDF       ? "Loading PDF reader..."       : "Reading CSV statement...";      let data;      if (isPDF) {       await window.loadMoneyLeakPdfJs();       $("status").textContent = "Reading your PDF statement...";       data = await parsePDF(file);     } else {       data = parseCSV(await file.text());     }      if (!data.length) {       throw new Error("No transactions found in this file.");     }      analyze(data);      $("status").textContent =       "Read " + data.length +       " transactions locally. Please verify every amount, date, transaction type, and category.";   } catch (err) {     console.error("MoneyLeak upload error:", err);     $("status").textContent =       "Upload failed: " + (err.message || "Unknown error. Try a CSV statement.");   } });
- const file=e.target.files[0];if(!file)return;
- if(file.size>10*1024*1024){$("status").textContent="File too large. Choose a file under 10 MB.";return}
+$("file").addEventListener("change",async event=>{
+ const file=event.target.files && event.target.files[0];
+ if(!file)return;
+ $("file").disabled=true;
  try{
-  $("status").textContent="Reading your statement…";
-  const data=file.name.toLowerCase().endsWith(".pdf")?await parsePDF(file):parseCSV(await file.text());
-  if(!data.length)throw Error("No transactions could be read from this file.");
+  if(file.size>10*1024*1024)throw Error("File too large. Choose a file under 10 MB.");
+  const pdf=/\.pdf$/i.test(file.name), csv=/\.csv$/i.test(file.name);
+  if(!pdf&&!csv)throw Error("Please select a PDF or CSV file.");
+
+  $("status").textContent=pdf?"Loading PDF reader…":"Reading CSV statement…";
+  const data=pdf?await parsePDF(file):parseCSV(await file.text());
+  if(!data.length)throw Error("No transactions found.");
   analyze(data);
-  $("status").textContent="Read "+data.length+" transactions locally. Please verify every amount, date, type and category, especially for PDF imports.";
- }catch(err){$("status").textContent=err.message||"Could not read this statement."}
+  $("status").textContent="Read "+data.length+" transactions locally. Please verify the dates, amounts, income/expense types and categories before relying on the report.";
+ }catch(error){
+  console.error("MoneyLeak upload error:",error);
+  $("status").textContent="Upload failed: "+(error.message||"Unknown error. Try a CSV export.");
+ }finally{
+  $("file").disabled=false;
+ }
 });
 
 $("demo").addEventListener("click",()=>{
@@ -350,18 +420,24 @@ $("demo").addEventListener("click",()=>{
   {date:"2026-10-08",description:"Electricity bill",amount:1200,type:"expense",category:"Utilities & bills"},
   {date:"2026-10-10",description:"Bank fee",amount:250,type:"expense",category:"Bank fees"}
  ]);
- $("status").textContent="Fictional demo data loaded. No real statement was used.";
+ $("status").textContent="Demo data loaded. All transactions are fictional.";
 });
+
 $("reset").addEventListener("click",()=>{
- transactions=[];$("report").classList.add("hidden");$("file").value="";
+ transactions=[];
+ $("report").classList.add("hidden");
+ $("file").value="";
  $("status").textContent="Report cleared from this page.";
 });
+
 $("export").addEventListener("click",()=>{
  const quote=v=>'"'+String(v).replace(/"/g,'""')+'"';
- const rows=[["Date","Description","Amount","Type","Category"],...transactions.map(t=>[t.date,t.description,(t.type==="income"?t.amount:-t.amount).toFixed(2),t.type,t.category])];
+ const rows=[["Date","Description","Amount","Type","Category"],
+  ...transactions.map(t=>[t.date,t.description,(t.type==="income"?t.amount:-t.amount).toFixed(2),t.type,t.category])];
  const blob=new Blob(["\uFEFF"+rows.map(r=>r.map(quote).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
- const url=URL.createObjectURL(blob);const a=document.createElement("a");
- a.href=url;a.download="moneyleak-report.csv";a.click();URL.revokeObjectURL(url);
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;a.download="moneyleak-report.csv";a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
 })();
 </script>
