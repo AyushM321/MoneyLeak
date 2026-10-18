@@ -1,17 +1,20 @@
-# MoneyLeak v0.6 — Installable Web App
+# MoneyLeak v0.7 — PWA Icon Path Fix
 
-This update fixes the PWA icon paths and cache version while preserving the existing MoneyLeak web app interface and features. It is a web app/PWA package, not an Android APK.
+This package fixes the icon URL mismatch identified in the live screenshots. The repository's icon files are at the root, so `manifest.json` and `sw.js` now reference `/MoneyLeak/icon-192.png` and `/MoneyLeak/icon-512.png` instead of a missing `icons/` folder. Existing finance UI/features are preserved.
 
 ## Upload
 1. Extract this ZIP.
-2. Upload the extracted contents to the root of `AyushM321/MoneyLeak`, preserving folders.
-3. Replace `index.html`, `manifest.json`, `version.json`, and `sw.js`.
-4. Put the two PNGs inside `icons/` as `icon-192.png` and `icon-512.png`.
-5. Keep `.github/workflows/version.yml`.
-6. Commit the changes. Ensure Actions has Settings → Actions → General → Workflow permissions → Read and write permissions.
+2. Upload/replace `index.html`, `manifest.json`, `version.json`, `sw.js`, `icon-192.png`, and `icon-512.png` in the repository root.
+3. Keep `.github/workflows/version.yml` in that exact folder path.
+4. Commit to the branch used by GitHub Pages (`main` or `master`).
+5. Ensure Actions has Settings → Actions → General → Workflow permissions → Read and write permissions.
 
-## Install on Android
-Open `https://ayushm321.github.io/MoneyLeak/` in Chrome and choose Install app if available. If Chrome still refuses installation, check DevTools/Chrome remote inspection for manifest and service-worker errors; the shortcut option remains a fallback.
+## Verify
+After GitHub Pages deploys, these should display the wallet image (not 404):
+- https://ayushm321.github.io/MoneyLeak/icon-192.png
+- https://ayushm321.github.io/MoneyLeak/icon-512.png
+
+Then reopen the site in Chrome and try Install again. This fixes the confirmed missing-icon paths; if installation still fails, check Chrome's installability diagnostics next.
 
 ## Version rule
-This package is `v0.6`. The workflow increments the minor version on each push to main/master that changes app files (excluding version.json and README.md). Verify the workflow run and deployed version after uploading.
+This update is v0.7. The workflow is intended to increment the version on each app-file push, excluding version.json and README.md. Verify its Actions run after upload.

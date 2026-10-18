@@ -1,11 +1,11 @@
-const CACHE_NAME = "moneyleak-web-v0.6";
+const CACHE_NAME = "moneyleak-web-v0.7";
 const APP_SHELL = [
   "/MoneyLeak/",
   "/MoneyLeak/index.html",
   "/MoneyLeak/manifest.json",
   "/MoneyLeak/version.json",
-  "/MoneyLeak/icons/icon-192.png",
-  "/MoneyLeak/icons/icon-512.png"
+  "/MoneyLeak/icon-192.png",
+  "/MoneyLeak/icon-512.png"
 ];
 
 self.addEventListener("install", event => {

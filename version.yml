@@ -21,17 +21,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Increment version on every app-file update
+      - name: Increment version for every app-file update
         shell: bash
         run: |
           node <<'NODE'
           const fs = require('fs');
           const file = 'version.json';
-          let current = { version: '0.6' };
+          let current = { version: '0.7' };
           if (fs.existsSync(file)) {
             try { current = JSON.parse(fs.readFileSync(file, 'utf8')); } catch {}
           }
-          const parts = String(current.version || '0.6').replace(/^v/, '').split('.');
+          const parts = String(current.version || '0.7').replace(/^v/, '').split('.');
           const major = Number(parts[0] || 0);
           const minor = Number(parts[1] || 0) + 1;
           const version = `${major}.${minor}`;
