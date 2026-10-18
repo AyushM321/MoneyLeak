@@ -1,0 +1,26 @@
+{
+  "id": "/MoneyLeak/",
+  "name": "MoneyLeak",
+  "short_name": "MoneyLeak",
+  "description": "Your private personal finance tracker",
+  "start_url": "/MoneyLeak/",
+  "scope": "/MoneyLeak/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07110D",
+  "theme_color": "#07110D",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
