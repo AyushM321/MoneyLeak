@@ -76,7 +76,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.8</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v0.9</small>
   </div>
   <button class="privacy" id="demo" type="button">Try demo data</button>
 </header>
@@ -191,16 +191,25 @@ function parseCSV(text) {
  if (cell.length || row.length) { row.push(cell); if (row.some(v => v.trim())) rows.push(row); }
  if (rows.length < 2) throw Error("CSV must contain column headings and transaction rows.");
 
- const headers = rows[0].map(x => x.trim().toLowerCase());
+ // PhonePe exports include statement title and duration lines before the actual header.
+ const normalize = value => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+ const headerIndex = rows.findIndex(candidate => {
+  const h = candidate.map(normalize);
+  return h.some(x => x === "date" || x === "transaction date") &&
+         h.some(x => x.includes("transaction details") || x === "description" || x === "narration" || x === "details") &&
+         h.some(x => x === "amount" || x === "transaction amount" || x === "debit" || x === "credit");
+ });
+ if (headerIndex < 0) throw Error("Could not find the transaction header row. Please use the original PhonePe CSV export.");
+ const headers = rows[headerIndex].map(normalize);
  const find = names => headers.findIndex(h => names.some(n => h === n || h.includes(n)));
  const dateI = find(["date","transaction date","txn date","value date"]);
- const descI = find(["description","narration","particulars","details","merchant"]);
+ const descI = find(["transaction details","description","narration","particulars","details","merchant"]);
  const amountI = find(["amount","transaction amount"]);
  const debitI = find(["debit","withdrawal","money out"]);
  const creditI = find(["credit","deposit","money in"]);
-
+ const typeI = find(["transaction type","type"]);
  if (descI < 0 || (amountI < 0 && debitI < 0 && creditI < 0))
-  throw Error("Could not identify columns. Try Date, Description, Amount or Date, Description, Debit, Credit.");
+  throw Error("Could not identify transaction columns in this CSV.");
 
  const num = s => {
   const v = String(s || "").trim().replace(/[₹,\s]/g,"");
@@ -208,8 +217,7 @@ function parseCSV(text) {
   const n = Number(v.replace(/^\((.*)\)$/,"-$1"));
   return Number.isFinite(n) ? n : NaN;
  };
-
- return rows.slice(1).map(r => {
+ return rows.slice(headerIndex + 1).map(r => {
   const description = (r[descI] || "").trim();
   if (!description) return null;
   let amount, type;
@@ -217,7 +225,10 @@ function parseCSV(text) {
    const n = num(r[amountI]);
    if (!Number.isFinite(n) || n === 0) return null;
    amount = Math.abs(n);
-   type = n > 0 ? "income" : "expense";
+   const direction = String(typeI >= 0 ? r[typeI] : "").toLowerCase();
+   if (/\bcredit\b|\breceived\b|\bdeposit\b/.test(direction)) type = "income";
+   else if (/\bdebit\b|\bpaid\b|\bwithdrawal\b/.test(direction)) type = "expense";
+   else type = n > 0 ? "expense" : "income";
   } else {
    const debit = num(r[debitI]), credit = num(r[creditI]);
    if (!Number.isFinite(debit) || !Number.isFinite(credit)) return null;
@@ -270,7 +281,10 @@ function loadPDFLibrary() {
 // accepts only rows it can interpret and asks users to verify every result.
 async function parsePDF(file) {
  const loaded = await loadPDFLibrary();
- const pdfjs = loaded.lib;
+ const pdfjs = loaded && (loaded.lib || loaded);
+ if (!pdfjs || typeof pdfjs.getDocument !== "function") {
+  throw Error("PDF reader loaded incorrectly. Refresh the page and try again; if it repeats, use CSV for now.");
+ }
  const buffer = await file.arrayBuffer();
  const pdf = await pdfjs.getDocument({data:buffer}).promise;
  const lines = [];
@@ -295,39 +309,36 @@ async function parsePDF(file) {
  if (!lines.length) throw Error("This PDF contains no selectable text. Scanned PDFs need OCR; try exporting CSV.");
 
  const dateRe = /\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2}|\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{2,4})\b/i;
- const amountRe = /(?:\(?-?\d[\d,]*\.\d{2}\)?|\(?-?\d[\d,]{2,}\)?)(?:\s*(?:CR|DR))?/gi;
  const result = [];
-
  for (const line of lines) {
   const dm = line.match(dateRe);
   if (!dm) continue;
   const rest = line.slice(line.indexOf(dm[0]) + dm[0].length).trim();
-  const amounts = [...rest.matchAll(amountRe)];
+  // PhonePe statement rows explicitly label transaction direction and contain one amount.
+  const phonePeType = /\bCREDIT\b/i.test(rest) ? "income" : (/\bDEBIT\b/i.test(rest) ? "expense" : null);
+  const amounts = [...rest.matchAll(/₹?\s*(\(?-?\d[\d,]*(?:\.\d{1,2})?\)?)(?:\s*(?:CR|DR))?/gi)];
   if (!amounts.length) continue;
 
-  // Most statements list transaction amount before running balance.
-  // Do not guess when the row has only a single ambiguous amount.
-  if (amounts.length < 2) continue;
-  const match = amounts[amounts.length - 2];
-  const raw = match[0].trim();
-  const cleaned = raw.replace(/\b(CR|DR)\b/gi,"").replace(/[,\s()]/g,"");
-  let value = Number(cleaned);
+  let amountMatch = null;
+  if (phonePeType) {
+   // PhonePe transaction row has a single amount after DEBIT/CREDIT.
+   amountMatch = amounts[amounts.length - 1];
+  } else {
+   // For other bank formats, prefer the transaction amount before a trailing balance.
+   if (amounts.length < 2) continue;
+   amountMatch = amounts[amounts.length - 2];
+  }
+  const raw = amountMatch[1].trim();
+  const value = Number(raw.replace(/[,\s()]/g,""));
   if (!Number.isFinite(value) || value === 0) continue;
 
-  const description = rest.slice(0,match.index).replace(/\s+/g," ").trim();
+  let description = rest.slice(0, amountMatch.index).replace(/\s+/g," ").trim();
+  description = description.replace(/\b(?:DEBIT|CREDIT)\b/ig, "").trim();
   if (!description || /opening balance|closing balance|brought forward|carried forward/i.test(description)) continue;
-
-  let type = value < 0 ? "expense" : "expense";
-  if (/\bCR\b/i.test(raw)) type = "income";
-  else if (/\bDR\b/i.test(raw)) type = "expense";
-
-  result.push({
-   date:dm[0],description,amount:Math.abs(value),type,category:categorize(description)
-  });
+  let type = phonePeType || (/\bCR\b/i.test(amountMatch[0]) ? "income" : "expense");
+  result.push({date:dm[0], description, amount:Math.abs(value), type, category:categorize(description)});
  }
- if (!result.length) {
-  throw Error("Could not reliably read transaction rows from this PDF. Please use a CSV export if available. PDF formats differ between banks.");
- }
+ if (!result.length) throw Error("No transactions could be read from this PDF. Try the PhonePe CSV export instead.");
  return result;
 }
 
