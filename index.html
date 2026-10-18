@@ -146,7 +146,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:25px 12px}
 </main>
 
 <!-- PDF.js extracts text locally in your browser. It does not send the statement to a server. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+ <script> window.loadMoneyLeakPdfJs = function () {   if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);    if (window.moneyLeakPdfPromise) return window.moneyLeakPdfPromise;    const urls = [     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",     "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"   ];    window.moneyLeakPdfPromise = (async () => {     for (const url of urls) {       try {         await new Promise((resolve, reject) => {           const script = document.createElement("script");           script.src = url;           script.onload = resolve;           script.onerror = () => {             script.remove();             reject(new Error("PDF library could not load"));           };           document.head.appendChild(script);         });          if (window.pdfjsLib) {           window.pdfjsLib.GlobalWorkerOptions.workerSrc =             url.includes("cdnjs.cloudflare.com")               ? "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"               : "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";            return window.pdfjsLib;         }       } catch (error) {         // Try the next CDN.       }     }      window.moneyLeakPdfPromise = null;     throw new Error(       "PDF reader could not load. Check your internet connection or try a CSV statement."     );   })();    return window.moneyLeakPdfPromise; }; </script>
 <script>
 (() => {
 "use strict";
@@ -327,7 +327,7 @@ function analyze(data){
  });
 }
 
-$("file").addEventListener("change",async e=>{
+ $("file").addEventListener("change", async e => {   const file = e.target.files[0];   if (!file) return;    try {     if (file.size > 10 * 1024 * 1024) {       throw new Error("File too large. Choose a file under 10 MB.");     }      const isPDF = /\.pdf$/i.test(file.name);     const isCSV = /\.csv$/i.test(file.name);      if (!isPDF && !isCSV) {       throw new Error("Please select a PDF or CSV file.");     }      $("status").textContent = isPDF       ? "Loading PDF reader..."       : "Reading CSV statement...";      let data;      if (isPDF) {       await window.loadMoneyLeakPdfJs();       $("status").textContent = "Reading your PDF statement...";       data = await parsePDF(file);     } else {       data = parseCSV(await file.text());     }      if (!data.length) {       throw new Error("No transactions found in this file.");     }      analyze(data);      $("status").textContent =       "Read " + data.length +       " transactions locally. Please verify every amount, date, transaction type, and category.";   } catch (err) {     console.error("MoneyLeak upload error:", err);     $("status").textContent =       "Upload failed: " + (err.message || "Unknown error. Try a CSV statement.");   } });
  const file=e.target.files[0];if(!file)return;
  if(file.size>10*1024*1024){$("status").textContent="File too large. Choose a file under 10 MB.";return}
  try{
