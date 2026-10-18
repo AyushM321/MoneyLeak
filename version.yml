@@ -1,39 +1,16 @@
-name: Update MoneyLeak version
+name: Legacy version workflow (disabled)
 
+# Versioning is handled by android-apk.yml so that the website and APK share one version.
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - 'version.json'
   workflow_dispatch:
-
-permissions:
-  contents: write
+    inputs:
+      note:
+        description: "No action needed; run MoneyLeak Android APK and Auto Version instead."
+        required: false
+        type: string
 
 jobs:
-  version:
+  notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Increment app version
-        shell: bash
-        run: |
-          CURRENT=$(jq -r '.version' version.json)
-          CURRENT=${CURRENT#v}
-          if [[ "$CURRENT" =~ ^([0-9]+)\.([0-9]+)$ ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-          else
-            echo "Unexpected version format in version.json: $CURRENT" >&2
-            exit 1
-          fi
-          NEXT_MINOR=$((MINOR + 1))
-          printf '{\n  "version": "%s.%s"\n}\n' "$MAJOR" "$NEXT_MINOR" > version.json
-      - name: Commit version change
-        run: |
-          if git diff --quiet -- version.json; then exit 0; fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.json
-          git commit -m "chore: auto-increment MoneyLeak version"
-          git push
+      - run: echo "Versioning is managed by .github/workflows/android-apk.yml"
