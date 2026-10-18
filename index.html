@@ -63,6 +63,40 @@ th{color:var(--muted)}
 select{max-width:170px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px}
 .hidden{display:none!important}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
+
+.eyebrow{display:flex;align-items:center;gap:8px}
+.eyebrow-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #45e0a077}
+.intro{margin-bottom:22px;max-width:720px;padding:8px 0 2px}
+.intro h1{font-size:clamp(30px,5vw,43px);margin:10px 0}
+.intro p{max-width:620px;margin:0 0 17px;font-size:15px;line-height:1.6}
+.intro .btn{padding:10px 15px}
+.privacy{font-size:12px;padding:9px 13px}
+.import-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px}
+.import-overlay.hidden{display:none!important}
+.import-backdrop{position:absolute;inset:0;background:rgba(3,8,13,.78);backdrop-filter:blur(7px)}
+.import-modal-scroll{position:relative;width:min(100%,590px);max-height:calc(100dvh - 36px);overflow-y:auto;overscroll-behavior:contain}
+.import-dialog{padding:20px;margin:0;box-shadow:0 24px 80px #0008}
+.import-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.import-heading h2{margin:0}
+.import-subtitle{font-size:12px;margin:4px 0 0}
+.close-import{width:34px;height:34px;flex-shrink:0;border:1px solid var(--border);border-radius:50%;background:var(--panel2);color:var(--text);font-size:23px;line-height:1}
+.import-dialog>.muted{font-size:13px;margin:12px 0}
+.upload{padding:20px 12px;margin-top:12px}
+.upload-actions{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.upload-actions .btn{min-width:112px}
+.import-dialog .notice{font-size:11px}
+@media(max-width:600px){
+ .intro{margin-bottom:18px;padding-top:2px}
+ .intro h1{font-size:clamp(29px,8vw,36px);line-height:1.12;letter-spacing:-1.2px}
+ .intro p{font-size:14px;line-height:1.55;margin-bottom:14px}
+ .privacy{font-size:10px;padding:8px 10px}
+ .import-overlay{padding:10px}
+ .import-modal-scroll{max-height:calc(100dvh - 20px)}
+ .import-dialog{padding:16px}
+ .upload{padding:16px 9px}
+ input[type=file]{font-size:12px}
+}
+
 @media(max-width:600px){header{padding:13px 15px}.brand{font-size:21px}.logo{width:36px;height:36px}.privacy{font-size:10px}main{margin-top:24px;padding:0 13px 35px}.panel{padding:16px}.stats{grid-template-columns:1fr}.stat{padding:15px}.categories{grid-template-columns:1fr}}
 </style>
 </head>
@@ -76,20 +110,21 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.7</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v3.8</small>
   </div>
-  <button class="privacy" id="demo" type="button">Try demo data</button>
+  <button class="privacy" id="openImport" type="button">＋ Import statement</button>
 </header>
 
 <main>
 <section class="intro">
-  <div class="eyebrow">Your personal finance companion</div>
-  <h1>Know where your money <span style="color:var(--green)">goes.</span></h1>
-  <p class="muted">Understand spending habits, discover potential money leaks, and find realistic ways to save — without connecting your bank account.</p>
+  <div class="eyebrow"><span class="eyebrow-dot"></span> Private personal finance</div>
+  <h1>Your money, <span style="color:var(--green)">made clearer.</span></h1>
+  <p class="muted">Spot spending patterns, find potential money leaks, and make smarter choices — all from your statement, right on your device.</p>
+  <button class="btn" id="heroImport" type="button">Import a statement <span aria-hidden="true">→</span></button>
 </section>
 
-<section class="panel">
-  <h2>Import your statement</h2>
+<div class="import-overlay hidden" id="importOverlay"><div class="import-backdrop" id="importBackdrop"></div><div class="import-modal-scroll"><section class="panel import-dialog" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+  <div class="import-heading"><div><h2 id="importTitle">Import your statement</h2><p class="muted import-subtitle">Your file stays on this device.</p></div><button class="close-import" id="closeImport" type="button" aria-label="Close import window">×</button></div>
   <p class="muted">Choose a CSV or text-based PDF statement. Processing happens in your browser.</p>
   <div class="upload">
     <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
@@ -98,11 +133,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
     <div><strong>Select your bank statement</strong></div>
     <p class="muted" style="font-size:13px">CSV or text-based PDF · Maximum 10 MB</p>
     <input id="file" type="file" accept=".csv,.pdf,text/csv,application/pdf" aria-label="Select bank statement">
-    <button class="btn secondary" id="provide" type="button">Provide</button>
+    <div class="upload-actions"><button class="btn secondary" id="provide" type="button">Provide</button><button class="btn ghost" id="demo" type="button">Try demo data</button></div>
   </div>
   <p id="status" class="muted status" role="status" aria-live="polite">Choose a CSV or PDF statement, then tap Provide to process it.</p>
   <div class="notice">Privacy: your statement is not sent to a MoneyLeak server. PDF.js is loaded from a public CDN. Never upload banking passwords, PINs, or OTPs. Scanned PDFs may require OCR and are not supported by this reader. Always verify the results.</div>
-</section>
+</section></div></div>
 
 <div id="report" class="hidden">
 <section class="stats">
@@ -458,6 +493,23 @@ $("provide").addEventListener("click", async () => {
     $("provide").disabled = false;
     $("file").disabled = false;
   }
+});
+
+function openImportDialog() {
+  $("importOverlay").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("file").focus(), 50);
+}
+function closeImportDialog() {
+  $("importOverlay").classList.add("hidden");
+  document.body.style.overflow = "";
+}
+$("openImport").addEventListener("click", openImportDialog);
+$("heroImport").addEventListener("click", openImportDialog);
+$("closeImport").addEventListener("click", closeImportDialog);
+$("importBackdrop").addEventListener("click", closeImportDialog);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !$("importOverlay").classList.contains("hidden")) closeImportDialog();
 });
 
 $("demo").addEventListener("click",()=>{
