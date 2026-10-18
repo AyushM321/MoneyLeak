@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>MoneyLeak — Know Where Your Money Goes</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#172033;background:#f4f6fa;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0}
+header{background:#101827;color:white;padding:22px max(20px,calc((100% - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:24px;font-weight:850;letter-spacing:-1px}
+.brand span{color:#57e3ad}
+header small{color:#bac5d8}
+main{max-width:1100px;margin:28px auto;padding:0 18px 45px}
+.intro{margin-bottom:25px}
+h1{font-size:clamp(26px,5vw,38px);letter-spacing:-1.5px;margin:0 0 8px}
+p{line-height:1.6}
+.muted{color:#68748a}
+.panel,.stat,.category{background:white;border:1px solid #e6eaf1;border-radius:17px}
+.panel{padding:23px;margin-bottom:20px}
+.panel h2{font-size:19px;margin:0 0 8px}
+.upload{border:2px dashed #cbd5e3;border-radius:13px;text-align:center;padding:26px 15px;margin-top:16px}
+input[type=file]{max-width:100%;margin:15px auto;display:block}
+button,.button{border:0;border-radius:10px;padding:12px 17px;font-weight:750;cursor:pointer;font-size:14px;background:#167957;color:white}
+button:focus-visible,input:focus-visible{outline:3px solid #62b6ff;outline-offset:3px}
+button.secondary{background:#e9f7f1;color:#126a4d}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.stat{padding:19px;min-width:0}
+.stat p{font-size:13px;color:#68748a;margin:0 0 12px}
+.stat strong{font-size:clamp(18px,3.6vw,28px);overflow-wrap:anywhere}
+.stat small{display:block;color:#68748a;margin-top:8px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:17px}
+.category{padding:15px;min-width:0}
+.cat-top{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-weight:700}
+.bar{height:8px;border-radius:10px;background:#edf0f5;margin-top:12px;overflow:hidden}
+.bar div{height:100%;background:#19a779;border-radius:10px}
+.insights{display:grid;gap:12px;margin-top:17px}
+.insight{padding:15px;background:#f0faf5;border-radius:12px;line-height:1.6}
+.insight strong{display:block;margin-bottom:4px}
+.table-wrap{overflow-x:auto;margin-top:15px}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f5}
+th{color:#68748a;font-weight:700}
+select{padding:8px;border:1px solid #d7dfeb;border-radius:8px;background:white;max-width:160px}
+.hidden{display:none!important}
+.notice{font-size:13px;background:#fff8e8;padding:13px;border-radius:10px;color:#77551a;line-height:1.6}
+footer{text-align:center;color:#7b8494;font-size:12px;padding:20px}
+@media(max-width:600px){main{margin-top:20px}.stats{grid-template-columns:1fr}.stat{padding:16px}.categories{grid-template-columns:1fr}.panel{padding:17px}header{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Money<span>Leak</span></div>
+  <small>Private by design</small>
+</header>
+<main>
+  <section class="intro">
+    <h1>Your money, understood.</h1>
+    <p class="muted">Find your spending patterns, spot possible money leaks, and discover ways to save.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Import your bank statement</h2>
+    <p class="muted">Start with a CSV file containing transaction date, description, and amount. Your file is processed in this browser; it is not uploaded to a server.</p>
+    <div class="upload">
+      <strong>Choose a CSV statement</strong>
+      <p class="muted">Example columns: Date, Description, Amount</p>
+      <input id="file" type="file" accept=".csv,text/csv">
+      <button id="demo" class="secondary">Try demo data instead</button>
+    </div>
+    <p id="status" class="muted" role="status" aria-live="polite">No statement loaded yet.</p>
+    <p class="notice">Privacy tip: use a statement with account numbers and other identifying information removed. Never upload your banking password, PIN, or OTP.</p>
+  </section>
+
+  <div id="report" class="hidden">
+    <section class="stats">
+      <div class="stat"><p>Total income</p><strong id="income">₹0</strong><small>Detected money received</small></div>
+      <div class="stat"><p>Total expenses</p><strong id="expenses">₹0</strong><small>Detected money spent</small></div>
+      <div class="stat"><p>Net cash flow</p><strong id="balance">₹0</strong><small>Income minus expenses</small></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><h2>Where your money goes</h2><button id="reset" class="secondary">Clear data</button></div>
+      <p class="muted">Categories are estimates based on transaction descriptions. Check them before making decisions.</p>
+      <div id="categories" class="categories"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Potential money leaks</h2>
+      <p class="muted">These are clues to review, not proof that a purchase was unnecessary.</p>
+      <div id="insights" class="insights"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head"><h2>Transactions</h2><button id="export" class="secondary">Export report CSV</button></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Category</th></tr></thead>
+          <tbody id="transactions"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <footer>MoneyLeak • A personal finance tool • Review every estimate before acting.</footer>
+</main>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(n);
+let transactions = [];
+
+function categorize(description){
+  const d = description.toLowerCase();
+  if(/salary|payroll|wages|stipend/.test(d)) return "Salary";
+  if(/interest credited|dividend|refund received/.test(d)) return "Other income";
+  if(/rent|landlord/.test(d)) return "Rent";
+  if(/grocery|grocer|supermarket|vegetable|milk|food|restaurant|cafe|swiggy|zomato/.test(d)) return "Food & groceries";
+  if(/uber|ola|rapido|petrol|fuel|metro|bus|train|transport/.test(d)) return "Transport";
+  if(/electricity|water bill|gas bill|broadband|wifi|mobile recharge|phone bill/.test(d)) return "Utilities & bills";
+  if(/netflix|spotify|prime video|subscription|membership/.test(d)) return "Subscriptions";
+  if(/hospital|pharmacy|medical|doctor|medicine|clinic/.test(d)) return "Healthcare";
+  if(/school|college|tuition|course|education/.test(d)) return "Education";
+  if(/amazon|flipkart|shopping|clothing|fashion|myntra/.test(d)) return "Shopping";
+  if(/atm|cash withdrawal/.test(d)) return "Cash withdrawal";
+  if(/transfer|upi\/|imps|neft|rtgs|sent to|received from/.test(d)) return "Transfers";
+  if(/fee|charge|penalty/.test(d)) return "Bank fees";
+  return "Other spending";
+}
+
+function parseCSV(text){
+  const rows=[]; let row=[], cell="", quoted=false;
+  text=text.replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c === '"' && quoted && text[i+1] === '"'){cell+='"';i++}
+    else if(c === '"') quoted=!quoted;
+    else if(c === ',' && !quoted){row.push(cell);cell=""}
+    else if((c === '\n'||c === '\r')&&!quoted){
+      if(c==='\r'&&text[i+1]==='\n')i++;
+      row.push(cell);
+      if(row.some(v=>v.trim()))rows.push(row);
+      row=[];cell="";
+    }else cell+=c;
+  }
+  if(cell.length||row.length){row.push(cell);if(row.some(v=>v.trim()))rows.push(row)}
+  if(rows.length<2) throw Error("The CSV needs a header row and at least one transaction.");
+  const headers=rows[0].map(x=>x.trim().toLowerCase());
+  const find=names=>headers.findIndex(h=>names.some(n=>h===n||h.includes(n)));
+  const dateI=find(["date","transaction date","txn date"]);
+  const descI=find(["description","narration","particulars","details","merchant"]);
+  let amountI=find(["amount","transaction amount"]);
+  const debitI=find(["debit","withdrawal","money out"]);
+  const creditI=find(["credit","deposit","money in"]);
+  if(descI<0|| (amountI<0&&(debitI<0||creditI<0))){
+    throw Error("Could not identify columns. Use Date, Description, Amount, or Date, Description, Debit, Credit.");
+  }
+  return rows.slice(1).map(r=>{
+    const desc=(r[descI]||"").trim();
+    if(!desc)return null;
+    const num=s=>Number(String(s||"").replace(/[₹,\s]/g,"").replace(/^\((.*)\)$/,"-$1"));
+    let amount, type;
+    if(amountI>=0){
+      amount=num(r[amountI]);
+      if(!Number.isFinite(amount)||amount===0)return null;
+      type=amount>0?"income":"expense";
+      amount=Math.abs(amount);
+    }else{
+      const debit=num(r[debitI]),credit=num(r[creditI]);
+      if(!Number.isFinite(debit)||!Number.isFinite(credit))return null;
+      if(debit>0){amount=debit;type="expense"}
+      else if(credit>0){amount=credit;type="income"}
+      else return null;
+    }
+    return {date:dateI>=0?(r[dateI]||""):"",description:desc,amount,type,category:categorize(desc)};
+  }).filter(Boolean);
+}
+
+function analyze(data){
+  transactions=data;
+  $("report").classList.remove("hidden");
+  const income=data.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+  const expenses=data.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+  $("income").textContent=money(income);
+  $("expenses").textContent=money(expenses);
+  $("balance").textContent=money(income-expenses);
+
+  const totals={};
+  data.filter(t=>t.type==="expense").forEach(t=>totals[t.category]=(totals[t.category]||0)+t.amount);
+  const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  $("categories").replaceChildren();
+  if(!sorted.length)$("categories").textContent="No expenses detected.";
+  sorted.forEach(([name,value])=>{
+    const el=document.createElement("div");el.className="category";
+    const top=document.createElement("div");top.className="cat-top";
+    const label=document.createElement("span");label.textContent=name;
+    const amount=document.createElement("span");amount.textContent=money(value);
+    top.append(label,amount);
+    const bar=document.createElement("div");bar.className="bar";
+    const fill=document.createElement("div");
+    fill.style.width=(expenses?Math.min(100,value/expenses*100):0)+"%";
+    bar.append(fill);el.append(top,bar);
+    const pct=document.createElement("small");pct.className="muted";
+    pct.textContent=(expenses?value/expenses*100:0).toFixed(1)+"% of expenses";
+    el.append(pct);$("categories").append(el);
+  });
+
+  const tips=[];
+  const recurring={};
+  data.filter(t=>t.type==="expense").forEach(t=>{
+    if(t.category==="Subscriptions")recurring[t.description]=(recurring[t.description]||0)+1;
+  });
+  const subs=data.filter(t=>t.type==="expense"&&t.category==="Subscriptions").reduce((s,t)=>s+t.amount,0);
+  if(subs>0)tips.push(["Review subscriptions","Detected "+money(subs)+" in subscription-labelled transactions. Check which services you still use."]);
+  const fees=totals["Bank fees"]||0;
+  if(fees>0)tips.push(["Check bank charges","Found "+money(fees)+" in fee-like transactions. Verify whether any charges can be avoided."]);
+  const shopping=totals["Shopping"]||0;
+  if(expenses>0&&shopping/expenses>=0.2)tips.push(["Review shopping spending","Shopping is "+(shopping/expenses*100).toFixed(1)+"% of detected expenses. Decide whether this matches your priorities."]);
+  const transfers=totals["Transfers"]||0;
+  if(transfers>0)tips.push(["Check transfers separately","Some transfers may be movements between your own accounts, not actual spending. Exclude internal transfers when calculating savings."]);
+  const cash=totals["Cash withdrawal"]||0;
+  if(cash>0)tips.push(["Track cash purchases","Cash withdrawals total "+money(cash)+". Add cash purchases if you want a more complete spending picture."]);
+  if(income>0&&expenses>income)tips.push(["Spending exceeds income","Detected expenses are higher than detected income. Check missing income, transfers, and the statement period before drawing conclusions."]);
+  if(!tips.length)tips.push(["Start with your largest categories","Review your top spending categories and choose one realistic change that fits your needs."]);
+  $("insights").replaceChildren();
+  tips.forEach(([title,body])=>{
+    const el=document.createElement("div");el.className="insight";
+    const strong=document.createElement("strong");strong.textContent=title;
+    const desc=document.createElement("span");desc.textContent=body;
+    el.append(strong,desc);$("insights").append(el);
+  });
+
+  const tbody=$("transactions");tbody.replaceChildren();
+  data.forEach(t=>{
+    const tr=document.createElement("tr");
+    [t.date,t.description,(t.type==="income"?"+":"−")+money(t.amount),t.type].forEach(v=>{
+      const td=document.createElement("td");td.textContent=v;tr.append(td);
+    });
+    const td=document.createElement("td");
+    const select=document.createElement("select");
+    [...new Set([t.category,"Food & groceries","Transport","Utilities & bills","Subscriptions","Healthcare","Education","Shopping","Rent","Cash withdrawal","Bank fees","Transfers","Salary","Other income","Other spending"])].forEach(c=>{
+      const o=document.createElement("option");o.value=c;o.textContent=c;
+      if(c===t.category)o.selected=true;select.append(o);
+    });
+    select.addEventListener("change",()=>{t.category=select.value;analyze(transactions)});
+    td.append(select);tr.append(td);tbody.append(tr);
+  });
+  $("status").textContent="Analyzed "+data.length+" transactions. Check categories and transaction signs before relying on the report.";
+}
+
+$("file").addEventListener("change",async e=>{
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>5*1024*1024){$("status").textContent="File too large. Please choose a CSV under 5 MB.";return}
+  try{analyze(parseCSV(await file.text()));$("status").textContent="Statement processed locally."}
+  catch(err){$("status").textContent=err.message}
+});
+
+$("demo").addEventListener("click",()=>{
+  analyze([
+    {date:"2026-10-01",description:"Monthly salary",amount:30000,type:"income",category:"Salary"},
+    {date:"2026-10-02",description:"House rent",amount:7000,type:"expense",category:"Rent"},
+    {date:"2026-10-03",description:"Grocery supermarket",amount:2300,type:"expense",category:"Food & groceries"},
+    {date:"2026-10-04",description:"Streaming subscription",amount:649,type:"expense",category:"Subscriptions"},
+    {date:"2026-10-05",description:"Shopping online",amount:2500,type:"expense",category:"Shopping"},
+    {date:"2026-10-06",description:"Metro transport",amount:500,type:"expense",category:"Transport"},
+    {date:"2026-10-08",description:"Electricity bill",amount:1200,type:"expense",category:"Utilities & bills"},
+    {date:"2026-10-10",description:"Bank fee",amount:250,type:"expense",category:"Bank fees"}
+  ]);
+  $("status").textContent="Demo data loaded. These are fictional transactions.";
+});
+$("reset").addEventListener("click",()=>{
+  transactions=[];$("report").classList.add("hidden");$("file").value="";
+  $("status").textContent="Data cleared from the current report.";
+});
+$("export").addEventListener("click",()=>{
+  const quote=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[["Date","Description","Amount","Type","Category"],...transactions.map(t=>[t.date,t.description,(t.type==="income"?t.amount:-t.amount).toFixed(2),t.type,t.category])];
+  const blob=new Blob(["\uFEFF"+rows.map(r=>r.map(quote).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="moneyleak-report.csv";a.click();URL.revokeObjectURL(url);
+});
+})();
+</script>
+</body>
+</html>
