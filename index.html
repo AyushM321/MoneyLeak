@@ -175,7 +175,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
       <circle cx="31" cy="26" r="2" fill="#0b1018"/>
       <path d="M11 20h10M11 26h7" stroke="#45e0a0" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    Money<span>Leak</span><small id="appVersion" class="version-badge">v4.2</small>
+    Money<span>Leak</span><small id="appVersion" class="version-badge">v4.3</small>
   </div>
   <nav class="top-nav" aria-label="Main navigation">
     <button class="privacy nav-btn" id="openHistory" type="button">History <span id="historyCount">0</span></button>
@@ -202,7 +202,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 </section>
 <section class="panel">
   <div class="section-head"><h2>Spending breakdown</h2><button class="btn ghost" id="reset" type="button">Clear data</button></div>
-  <p class="muted">Categories are estimates based on descriptions. Edit them where needed.</p>
+  <p class="muted">Types and categories are estimates based on statement fields and descriptions. Review “Unknown” transactions and edit the type or category; your corrections are remembered on this device.</p>
   <div id="categories" class="categories"></div>
 </section>
 <section class="panel">
@@ -214,7 +214,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
   <div class="section-head"><h2>Transactions</h2><button class="btn secondary" id="export" type="button">Export CSV</button></div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Category</th></tr></thead>
+      <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Transaction type</th><th>Category</th></tr></thead>
       <tbody id="transactions"></tbody>
     </table>
   </div>
@@ -247,8 +247,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 8px}
 <section id="moreView" class="app-view hidden">
   <div class="page-heading"><button class="btn ghost back-home" data-view="home" type="button">← Home</button><div><div class="eyebrow">MoneyLeak information</div><h1>More</h1><p class="muted">App information, policies, and release notes.</p></div></div>
   <section class="panel info-panel" id="updatesSection">
-    <div class="section-head"><div><h2>What's new</h2><p class="muted info-subtitle">A short changelog for each app update.</p></div><span class="version-badge">Latest · v4.2</span></div>
-    <article class="release-item"><div class="release-title"><strong>Version 4.2</strong><span class="muted">Latest update</span></div><ul><li>Moved Statement history into its own History page.</li><li>Added a subtle blended background and refined mobile spacing.</li><li>Kept existing statement history, reports, and import features.</li></ul></article>
+    <div class="section-head"><div><h2>What's new</h2><p class="muted info-subtitle">A short changelog for each app update.</p></div><span class="version-badge">Latest · v4.3</span></div>
+    <article class="release-item"><div class="release-title"><strong>Version 4.3</strong><span class="muted">Latest update</span></div><ul><li>Improved transaction type detection for income, expenses, transfers, refunds, reversals, and cash withdrawals.</li><li>Added a review option for uncertain transactions and editable transaction types.</li><li>Remembered corrected transaction types and categories locally on this device.</li><li>Improved category rules and excluded transfers and cash withdrawals from ordinary spending totals.</li></ul></article>
   </section>
   <section class="panel info-panel" id="privacyPolicy">
     <h2>Privacy policy</h2>
@@ -290,25 +290,60 @@ fetch("version.json", {cache:"no-store"})
 const categoryNames = [
  "Food & groceries","Transport","Utilities & bills","Subscriptions",
  "Healthcare","Education","Shopping","Rent","Cash withdrawal",
- "Bank fees","Transfers","Salary","Other income","Other spending"
+ "Bank fees","Transfers","Salary","Other income","Refunds & reversals",
+ "Other spending","Needs review"
 ];
-
-function categorize(description) {
- const d = description.toLowerCase();
+const transactionTypes = ["income","expense","transfer","refund","reversal","cash withdrawal","unknown"];
+const OVERRIDES_KEY = "moneyleak_transaction_rules_v1";
+function normalizedDescription(description) {
+ return String(description || "").toLowerCase().replace(/\b\d{6,}\b/g," ").replace(/[^a-z]+/g," ").trim().replace(/\s+/g," ");
+}
+function readOverrides() {
+ try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || "{}"); } catch (_) { return {}; }
+}
+function saveOverride(description, type, category) {
+ const key = normalizedDescription(description);
+ if (!key) return;
+ const rules = readOverrides();
+ rules[key] = {type, category};
+ try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(rules)); } catch (_) {}
+}
+function categorize(description, type="expense") {
+ const d = String(description || "").toLowerCase();
+ if (/\b(reversal|reversed|txn reversed|transaction reversed)\b/.test(d)) return "Refunds & reversals";
+ if (/\b(refund|cashback|cash back|chargeback)\b/.test(d)) return "Refunds & reversals";
+ if (type === "transfer" || /\b(self transfer|own account|fund transfer|account transfer|imps|neft|rtgs|upi transfer|transfer to|transfer from)\b/.test(d)) return "Transfers";
  if (/salary|payroll|wages|stipend/.test(d)) return "Salary";
- if (/interest credited|dividend|refund received/.test(d)) return "Other income";
+ if (/interest credited|dividend|interest received/.test(d)) return "Other income";
  if (/rent|landlord/.test(d)) return "Rent";
- if (/grocery|supermarket|vegetable|milk|restaurant|cafe|swiggy|zomato|food/.test(d)) return "Food & groceries";
- if (/uber|ola|rapido|petrol|fuel|metro|bus|train|transport/.test(d)) return "Transport";
- if (/electricity|water bill|gas bill|broadband|wifi|recharge|phone bill/.test(d)) return "Utilities & bills";
- if (/netflix|spotify|prime video|subscription|membership/.test(d)) return "Subscriptions";
- if (/hospital|pharmacy|medical|doctor|medicine|clinic/.test(d)) return "Healthcare";
- if (/school|college|tuition|course|education/.test(d)) return "Education";
- if (/amazon|flipkart|shopping|clothing|fashion|myntra/.test(d)) return "Shopping";
- if (/atm|cash withdrawal/.test(d)) return "Cash withdrawal";
- if (/transfer|upi|imps|neft|rtgs|sent to|received from/.test(d)) return "Transfers";
- if (/fee|charge|penalty/.test(d)) return "Bank fees";
- return "Other spending";
+ if (/grocery|supermarket|vegetable|milk|restaurant|cafe|swiggy|zomato|food|dominos|pizza|bakery/.test(d)) return "Food & groceries";
+ if (/uber|ola|rapido|petrol|fuel|metro|bus|train|transport|parking|toll/.test(d)) return "Transport";
+ if (/electricity|water bill|gas bill|broadband|wifi|recharge|phone bill|mobile bill/.test(d)) return "Utilities & bills";
+ if (/netflix|spotify|prime video|subscription|membership|hotstar|youtube premium/.test(d)) return "Subscriptions";
+ if (/hospital|pharmacy|medical|doctor|medicine|clinic|diagnostic/.test(d)) return "Healthcare";
+ if (/school|college|tuition|course|education|exam fee/.test(d)) return "Education";
+ if (/amazon|flipkart|shopping|clothing|fashion|myntra|meesho/.test(d)) return "Shopping";
+ if (/atm|cash withdrawal|cash wdl/.test(d) || type === "cash withdrawal") return "Cash withdrawal";
+ if (/bank fee|service charge|processing fee|penalty|late fee|annual fee/.test(d)) return "Bank fees";
+ return type === "unknown" ? "Needs review" : "Other spending";
+}
+function detectType(description, direction, fallback="unknown") {
+ const d = String(description || "").toLowerCase();
+ const dir = String(direction || "").toLowerCase().trim();
+ if (/\b(reversal|reversed|txn reversed|transaction reversed)\b/.test(d)) return "reversal";
+ if (/\b(refund|cashback|cash back|chargeback)\b/.test(d)) return "refund";
+ if (/\b(self transfer|own account|fund transfer|account transfer|upi transfer|transfer to|transfer from)\b/.test(d)) return "transfer";
+ if (/\b(atm wdl|atm withdrawal|cash withdrawal|cash wdl)\b/.test(d)) return "cash withdrawal";
+ if (/\b(credit|received|deposit|money in|cr)\b/.test(dir)) return "income";
+ if (/\b(debit|paid|withdrawal|money out|dr)\b/.test(dir)) return "expense";
+ if (/\b(salary|payroll|wages|stipend|interest credited|dividend received)\b/.test(d)) return "income";
+ if (/\b(bank charges?|service charge|processing fee|penalty|late fee)\b/.test(d)) return "expense";
+ return fallback;
+}
+function applySavedRule(transaction) {
+ const rule = readOverrides()[normalizedDescription(transaction.description)];
+ if (rule) { if (transactionTypes.includes(rule.type)) transaction.type=rule.type; if (categoryNames.includes(rule.category)) transaction.category=rule.category; }
+ return transaction;
 }
 
 function parseCSV(text) {
@@ -359,23 +394,27 @@ function parseCSV(text) {
  return rows.slice(headerIndex + 1).map(r => {
   const description = (r[descI] || "").trim();
   if (!description) return null;
-  let amount, type;
+  let amount, fallback="unknown", direction = typeI >= 0 ? String(r[typeI] || "") : "";
   if (amountI >= 0) {
    const n = num(r[amountI]);
    if (!Number.isFinite(n) || n === 0) return null;
    amount = Math.abs(n);
-   const direction = String(typeI >= 0 ? r[typeI] : "").toLowerCase();
-   if (/\bcredit\b|\breceived\b|\bdeposit\b/.test(direction)) type = "income";
-   else if (/\bdebit\b|\bpaid\b|\bwithdrawal\b/.test(direction)) type = "expense";
-   else type = n > 0 ? "expense" : "income";
+   // Amount sign conventions differ between providers; don't infer direction from sign alone.
+   if (/\b(debit|paid|withdrawal|sent|purchase)\b/i.test(direction)) fallback = "expense";
+   else if (/\b(credit|received|deposit|salary)\b/i.test(direction)) fallback = "income";
   } else {
    const debit = num(r[debitI]), credit = num(r[creditI]);
    if (!Number.isFinite(debit) || !Number.isFinite(credit)) return null;
-   if (debit > 0) { amount = debit; type = "expense"; }
-   else if (credit > 0) { amount = credit; type = "income"; }
+   if (debit > 0 && credit > 0) return null;
+   if (debit > 0) { amount = debit; fallback = "expense"; direction = "debit"; }
+   else if (credit > 0) { amount = credit; fallback = "income"; direction = "credit"; }
    else return null;
   }
-  return {date:dateI >= 0 ? (r[dateI] || "") : "",description,amount,type,category:categorize(description)};
+  let type = detectType(description, direction, fallback);
+  if (!transactionTypes.includes(type)) type = "unknown";
+  const transaction = {date:dateI >= 0 ? (r[dateI] || "") : "",description,amount,type,category:categorize(description,type)};
+  if (type === "unknown") transaction.category = "Needs review";
+  return applySavedRule(transaction);
  }).filter(Boolean);
 }
 
@@ -484,7 +523,10 @@ async function parsePDF(file) {
   if (!Number.isFinite(amount) || amount<=0) continue;
   const description=beforeType.replace(/\s+/g," ").trim();
   if (!description || /opening balance|closing balance|brought forward|carried forward/i.test(description)) continue;
-  result.push({date,description,amount,type,category:categorize(description)});
+  const detectedType = detectType(description, type, type);
+  const transaction = {date,description,amount,type:detectedType,category:categorize(description,detectedType)};
+  if (detectedType === "unknown") transaction.category = "Needs review";
+  result.push(applySavedRule(transaction));
  }
  if (!result.length) {
   throw Error("The PDF text was read, but transaction rows could not be interpreted. Use the PhonePe CSV export for this statement.");
@@ -592,7 +634,7 @@ function analyze(data) {
  $("balance").textContent = money(income-expenses);
 
  const totals = {};
- data.filter(t=>t.type==="expense" && t.category!=="Transfers").forEach(t=>{
+ data.filter(t=>t.type==="expense" && t.category!=="Transfers" && t.type!=="cash withdrawal").forEach(t=>{
   totals[t.category] = (totals[t.category]||0) + t.amount;
  });
  const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
@@ -636,17 +678,34 @@ function analyze(data) {
  const tbody=$("transactions");tbody.replaceChildren();
  data.forEach(t=>{
   const tr=document.createElement("tr");
-  [t.date,t.description,(t.type==="income"?"+":"−")+money(t.amount),t.type].forEach(v=>{
+  [t.date,t.description,(t.type==="income"?"+":"−")+money(t.amount)].forEach(v=>{
    const td=document.createElement("td");td.textContent=v;tr.append(td);
   });
+  const typeCell=document.createElement("td"), typeSelect=document.createElement("select");
+  transactionTypes.forEach(value=>{
+   const option=document.createElement("option");option.value=value;option.textContent=value.charAt(0).toUpperCase()+value.slice(1);
+   if(value===t.type)option.selected=true;
+   typeSelect.append(option);
+  });
+  typeSelect.setAttribute("aria-label","Transaction type for "+t.description);
+  typeSelect.addEventListener("change",()=>{
+   t.type=typeSelect.value;
+   if(t.type==="transfer")t.category="Transfers";
+   else if(t.type==="refund"||t.type==="reversal")t.category="Refunds & reversals";
+   else if(t.type==="cash withdrawal")t.category="Cash withdrawal";
+   else if(t.category==="Needs review"||t.category==="Transfers"||t.category==="Refunds & reversals"||t.category==="Cash withdrawal")t.category=categorize(t.description,t.type);
+   saveOverride(t.description,t.type,t.category); analyze(transactions); updateActiveHistory();
+  });
+  typeCell.append(typeSelect);tr.append(typeCell);
   const td=document.createElement("td"), select=document.createElement("select");
   [...new Set([t.category,...categoryNames])].forEach(c=>{
    const option=document.createElement("option");option.value=c;option.textContent=c;
    if(c===t.category)option.selected=true;
    select.append(option);
   });
-  select.addEventListener("change",()=>{t.category=select.value;analyze(transactions);updateActiveHistory();});
-  td.append(select);tr.append(td);tbody.append(tr);
+  select.setAttribute("aria-label","Category for "+t.description);
+  select.addEventListener("change",()=>{t.category=select.value;saveOverride(t.description,t.type,t.category);analyze(transactions);updateActiveHistory();});
+  td.append(select);tr.append(td);
  });
 }
 
@@ -727,7 +786,9 @@ $("demo").addEventListener("click",()=>{
   {date:"2026-10-05",description:"Shopping online",amount:2500,type:"expense",category:"Shopping"},
   {date:"2026-10-06",description:"Metro transport",amount:500,type:"expense",category:"Transport"},
   {date:"2026-10-08",description:"Electricity bill",amount:1200,type:"expense",category:"Utilities & bills"},
-  {date:"2026-10-10",description:"Bank fee",amount:250,type:"expense",category:"Bank fees"}
+  {date:"2026-10-10",description:"Bank fee",amount:250,type:"expense",category:"Bank fees"},
+  {date:"2026-10-11",description:"UPI transfer to own account",amount:1000,type:"transfer",category:"Transfers"},
+  {date:"2026-10-12",description:"Refund for online order",amount:450,type:"refund",category:"Refunds & reversals"}
  ]);
  $("status").textContent="Demo data loaded. All transactions are fictional.";
  closeImportDialog();
